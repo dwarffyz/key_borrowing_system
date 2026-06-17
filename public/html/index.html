@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BatStateU Key Borrowing Platform | Login</title>
+    <link rel="icon" href="../images/weblogo.svg" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css?v=20260507_04">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">
+                <img src="../images/weblogo.svg" alt="BatStateU Logo">
+                <span>BatStateU</span>
+            </a>
+            <div class="nav-buttons">
+                <label class="theme-toggle">
+                    <input type="checkbox" data-theme-toggle aria-label="Toggle dark mode">
+                    <span class="toggle-track">
+                        <span class="toggle-thumb"></span>
+                    </span>
+                    <span>Dark Mode</span>
+                </label>
+                <button id="homeBtn" class="nav-btn">Home</button>
+                <button id="aboutBtn" class="nav-btn">About Us</button>
+                <button id="contactBtn" class="nav-btn">Contact Us</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Section -->
+    <div class="login-section" id="login">
+        <div class="wrapper">
+            <!-- Left side logo -->
+            <div class="side-logo">
+                <img src="../images/logo.png" alt="Batangas State University Logo">
+            </div>
+
+            <!-- Login container -->
+            <div class="login-container">
+                <img src="../images/logo2.png" alt="BatStateU" class="logo">
+                <div class="title">
+                    BatStateU Online Key Borrowing System
+                </div>
+
+                <div class="switcher">
+                    <button id="teacherBtn" class="active">Teacher</button>
+                    <button id="adminBtn">Admin</button>
+                </div>
+
+                <!-- Teacher Login Form -->
+                <form id="teacherForm" class="active">
+                    <div class="form-group">
+                        <label for="teacher-id">Email Address</label>
+                        <input type="email" id="teacher-id" placeholder="Enter your email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="teacher-pass">Password</label>
+                        <input type="password" id="teacher-pass" placeholder="Enter your password" required>
+                    </div>
+
+                    <button type="submit" class="btn">Login</button>
+                    <a href="/create" class="create-link">Create Account</a>
+                    <a href="#" id="forgotPasswordBtn" class="create-link">Forgot Password?</a>
+                </form>
+
+                <!-- Admin Login Form -->
+                <form id="adminForm">
+                    <div class="form-group">
+                        <label for="admin-user">Admin Username</label>
+                        <input type="text" id="admin-user" placeholder="Admin username" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="admin-pass">Admin Password</label>
+                        <input type="password" id="admin-pass" placeholder="Admin password" required>
+                    </div>
+
+                    <button type="submit" class="btn">Login as Admin</button>
+                </form>
+
+                <div class="footer-text">
+                    © 2025 Batangas State University – The National Engineering University
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dev Team Section -->
+    <section class="dev-team" id="dev-team">
+        <div class="container">
+            <h2>Development Team</h2>
+            <div class="team-members">
+                <div class="member">
+                    <img src="../images/dev1.jpg" alt="Developer 1">
+                    <p>Ewart Kimpson M. Serrano</p>
+                    <p>Lead Developer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev2.jpg" alt="Developer 2">
+                    <p>Emmanuel Torres</p>
+                    <p>UI/UX Designer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev3.jpg" alt="Developer 3">
+                    <p>Honey Mae</p>
+                    <p>Backend Engineer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev4.jpg" alt="Developer 4">
+                    <p>Thea Mauleon</p>
+                    <p>Frontend Developer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev5.jpg" alt="Developer 5">
+                    <p>Desire Mercy Abadies</p>
+                    <p>Project Manager</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Forgot Password Modal (Teacher Only) -->
+    <div id="forgotPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Password</h3>
+                <button class="close close-forgot">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="helper-text">
+                    Enter your email address to receive a secure password reset link. We&#8217;ll send a one-time secure link to reset your password.
+                    For security reasons, password reset links expire after a short time. Please verify your email to continue.
+                </p>
+                <div class="form-group">
+                    <label for="forgotEmail">Email Address</label>
+                    <input type="email" id="forgotEmail" placeholder="Enter your email address" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="sendResetLinkBtn" class="btn">Send Reset Link</button>
+                <button class="btn btn-secondary close-forgot">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Us Modal -->
+    <div id="contactModal" class="modal">
+        <div class="modal-content contact-modal">
+            <div class="modal-header">
+                <h3>ICT Services Email Addresses</h3>
+                <button class="close close-contact">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="helper-text">
+                    For portal login concerns, contact us through the following email addresses:
+                </p>
+
+                <div class="contact-table-wrap" role="region" aria-label="Support email addresses">
+                    <table class="contact-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">
+                                    <span class="th-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" focusable="false" aria-hidden="true">
+                                            <path fill="currentColor" d="M12 3l9 6v2h-1v10h-6v-6H10v6H4V11H3V9l9-6zm0 2.2L5 9.6V10h1v9h2v-6h8v6h2v-9h1v-.4L12 5.2z"/>
+                                        </svg>
+                                    </span>
+                                    Campus / Unit
+                                </th>
+                                <th scope="col">
+                                    <span class="th-icon" aria-hidden="true">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" focusable="false" aria-hidden="true">
+                                            <path fill="currentColor" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                        </svg>
+                                    </span>
+                                    Email
+                                </th>
+                                <th scope="col" class="contact-actions-col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="contact-campus" data-label="Campus / Unit">Alangilan</td>
+                                <td data-label="Email">
+                                    <a class="contact-email" href="mailto:ict.alangilan@g.batstate-u.edu.ph">ict.alangilan@g.batstate-u.edu.ph</a>
+                                </td>
+                                <td class="contact-actions" data-label="Action">
+                                    <button type="button" class="btn btn-secondary btn-sm copy-email-btn" data-email="ict.alangilan@g.batstate-u.edu.ph" aria-label="Copy Alangilan email address">Copy</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="contact-campus" data-label="Campus / Unit">CET</td>
+                                <td data-label="Email">
+                                    <a class="contact-email" href="mailto:keybsu25@gmail.com">keybsu25@gmail.com</a>
+                                </td>
+                                <td class="contact-actions" data-label="Action">
+                                    <button type="button" class="btn btn-secondary btn-sm copy-email-btn" data-email="keybsu25@gmail.com" aria-label="Copy CET email address">Copy</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-contact">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for validation errors -->
+    <div id="validationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Error</h3>
+                <button class="close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Please fill out this field.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="../js/theme.js?v=20260207_2"></script>
+    <script src="../js/maintenance-client.js?v=20260507_01"></script>
+    <script src="../js/script.js?v=20260507_02"></script>
+</body>
+</html>

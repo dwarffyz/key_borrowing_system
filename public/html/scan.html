@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BatStateU Key Borrowing Platform | Scan QR</title>
+  <link rel="icon" href="../images/weblogo.svg" type="image/svg+xml">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="../css/style.css?v=20260507_04">
+</head>
+<body class="dashboard-body scan-page">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <h1>Scan QR Code</h1>
+    <div class="dashboard-header-tools">
+      <label class="theme-toggle">
+        <input type="checkbox" data-theme-toggle aria-label="Toggle dark mode">
+        <span class="toggle-track">
+          <span class="toggle-thumb"></span>
+        </span>
+        <span>Dark Mode</span>
+      </label>
+    </div>
+    <button id="backBtn" class="back-btn">Back to Dashboard</button>
+  </header>
+
+  <!-- Scan Section -->
+  <main class="scan-main">
+    <div class="scan-container">
+      <div class="scan-header">
+        <h2>Scan Admin QR Code</h2>
+        <p>Point the camera at the admin-generated key QR. The system will auto process borrow or return, even for newly added keys.</p>
+      </div>
+
+      <div class="scan-controls">
+        <button id="startScanBtn" class="scan-btn active">Start Live Scanner</button>
+      </div>
+      <p id="scanFallbackHint" class="scan-helper-text" hidden>
+        Live camera scan works best on a secure `https://` page. If the camera is blocked here, open the secure scanner instead.
+      </p>
+
+      <div class="scan-status">
+        <span class="status-label">Mode:</span>
+        <span id="actionIndicator" class="status-value">Auto Borrow/Return</span>
+        <span id="scannerStatus" class="status-chip">Scanner idle</span>
+      </div>
+
+      <div class="video-container">
+        <video id="camera" autoplay playsinline muted></video>
+        <canvas id="canvas"></canvas>
+        <div class="qr-overlay"></div>
+        <div id="scannerEmptyState" class="scanner-empty-state" hidden>
+          <div class="scanner-empty-icon">QR</div>
+          <h3>Secure Camera Required</h3>
+          <p>This phone is blocking camera access on the current page. Open the secure scanner button below to continue with live scanning.</p>
+          <div class="scanner-empty-actions"></div>
+        </div>
+      </div>
+
+      <div id="scanMessage" class="scan-message"></div>
+    </div>
+    <div class="current-time">
+      <div class="time-display">
+        <p id="currentDateTime"></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Notification Container -->
+  <div id="notificationContainer" class="toast-container"></div>
+
+  <!-- QR Scanner Library (local fallback) -->
+  <script src="../js/jsQR.js"></script>
+  <script src="../js/theme.js?v=20260207_2"></script>
+  <script src="../js/maintenance-client.js?v=20260507_01"></script>
+  <script src="../js/idle-logout.js?v=20260212_2"></script>
+  <script src="../js/scan-script.js?v=20260511_01"></script>
+</body>
+</html>

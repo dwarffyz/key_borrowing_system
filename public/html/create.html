@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BatStateU Key Borrowing Platform | Create Account</title>
+    <link rel="icon" href="../images/weblogo.svg" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css?v=20260507_04">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-btn">Home</a>
+            <label class="theme-toggle">
+                <input type="checkbox" data-theme-toggle aria-label="Toggle dark mode">
+                <span class="toggle-track">
+                    <span class="toggle-thumb"></span>
+                </span>
+                <span>Dark Mode</span>
+            </label>
+            <button id="aboutBtn" class="nav-btn">About Us</button>
+        </div>
+    </nav>
+
+    <!-- Create Account Section -->
+    <div class="create-section">
+        <div class="login-container">
+            <img src="../images/logo2.png" alt="BatStateU" class="logo">
+            <div class="title">
+                Create Teacher Account
+            </div>
+
+            <!-- Create Account Form -->
+            <form id="createAccountForm" class="active">
+                <div class="form-group">
+                    <label for="create-name">First Name</label>
+                    <input type="text" id="create-name" placeholder="Enter your first name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="create-lastname">Last Name</label>
+                    <input type="text" id="create-lastname" placeholder="Enter your last name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="create-email">Email</label>
+                    <input type="email" id="create-email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="create-pass">Password</label>
+                    <input type="password" id="create-pass" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn">Create Account</button>
+                <a href="/" class="create-link">Back to Login</a>
+            </form>
+
+            <div class="footer-text">
+                © 2025 Batangas State University – The National Engineering University
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Email Verification -->
+    <div id="verificationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Email Verification</h3>
+                <button class="close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    We sent a verification code to <strong id="verificationEmailDisplay"></strong>.
+                    Enter it below to finish creating your account.
+                </p>
+                <p class="helper-text">This code will expire in <span id="verificationExpiresIn">10 minutes</span>.</p>
+                <div class="form-group">
+                    <input
+                        type="text"
+                        id="verificationCode"
+                        placeholder="Enter 6-digit code"
+                        inputmode="numeric"
+                        autocomplete="one-time-code"
+                        required
+                    >
+                </div>
+                <button id="resendCodeBtn" type="button" class="btn btn-small btn-secondary" style="width: 100%;">
+                    Resend Code
+                </button>
+            </div>
+            <div class="modal-footer">
+                <button id="verifyBtn" class="btn btn-success">Verify Code</button>
+                <button class="btn btn-secondary close">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Invalid Verification Code -->
+    <div id="invalidModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Invalid Code</h3>
+                <button class="close close-invalid">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>The verification code you entered is incorrect. Please try again.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="closeInvalidBtn" class="btn btn-secondary">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Empty Verification Code -->
+    <div id="emptyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Please Enter Code</h3>
+                <button class="close close-empty">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>You must enter a verification code to proceed.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="closeEmptyBtn" class="btn btn-secondary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Account Created Successfully -->
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Success</h3>
+                <button class="close close-success">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Your email has been verified and your account has been created.</p>
+                <p class="text-muted">Please wait for admin approval to activate your dashboard access.</p>
+                <p class="text-muted">You will be redirected to the login page.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="closeSuccessBtn" class="btn btn-success">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dev Team Section -->
+    <section class="dev-team" id="dev-team">
+        <div class="container">
+            <h2>Development Team</h2>
+            <div class="team-members">
+                <div class="member">
+                    <img src="../images/dev1.jpg" alt="Developer 1">
+                    <p>Ewart Kimpson M. Serrano</p>
+                    <p>Lead Developer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev2.jpg" alt="Developer 2">
+                    <p>Emmanuel Torres</p>
+                    <p>UI/UX Designer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev3.jpg" alt="Developer 3">
+                    <p>Honey Mae</p>
+                    <p>Backend Engineer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev4.jpg" alt="Developer 4">
+                    <p>Thea Mauleon</p>
+                    <p>Frontend Developer</p>
+                </div>
+                <div class="member">
+                    <img src="../images/dev5.jpg" alt="Developer 5">
+                    <p>Desire Mercy Abadies</p>
+                    <p>Project Manager</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="../js/theme.js?v=20260207_2"></script>
+    <script src="../js/maintenance-client.js?v=20260507_01"></script>
+    <script src="../js/create-script.js?v=20260507_02"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+# Dependencies
+node_modules/
+public/node_modules/
+
+# Environment and secrets
+.env
+*.env
+!.env.example
+public/.env
+public/*.env
+!public/.env.example
+*.key
+*.pem
+*.pfx
+*.p12
+*.crt
+*.cer
+public/downloads/*.pfx
+public/downloads/*.cer
+public/downloads/*.crt
+public/downloads/*.key
+
+# Logs and runtime state
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.tools/
+*.pid
+
+# Build output
+dist/
+build/
+coverage/
+hardware/esp32-locker-controller/build/
+hardware/esp32-locker-controller/managed_components/
+
+# Python and ESP tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.python-version
+
+# Archives and backups
+backup/
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+
+# Local certificates and generated downloads
+public/downloads/
+

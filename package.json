@@ -1,0 +1,11 @@
+{
+  "name": "key-borrowing-system-root",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix public start",
+    "dev": "npm --prefix public run dev"
+  },
+  "dependencies": {
+    "jsqr": "^1.4.0"
+  }
+}

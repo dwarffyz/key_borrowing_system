@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BatStateU Key Borrowing Platform | Admin Dashboard</title>
+    <link rel="icon" href="../images/weblogo.svg" type="image/svg+xml">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../css/style.css?v=20260525_06">
+</head>
+<body class="dashboard-body has-drawer-nav">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <button
+            id="navToggleBtn"
+            class="nav-toggle-btn"
+            type="button"
+            data-nav-toggle
+            aria-label="Open menu"
+            aria-controls="navDrawer"
+            aria-expanded="false"
+        >
+            <svg class="nav-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z"></path>
+            </svg>
+        </button>
+        <h1>Admin Dashboard</h1>
+        <div class="dashboard-header-tools">
+            <label class="theme-toggle">
+                <input type="checkbox" data-theme-toggle aria-label="Toggle dark mode">
+                <span class="toggle-track">
+                    <span class="toggle-thumb"></span>
+                </span>
+                <span>Dark Mode</span>
+            </label>
+        </div>
+    </header>
+
+    <!-- Admin Dashboard Content -->
+    <main class="dashboard-main">
+        <!-- Dashboard Overview -->
+        <section id="adminOverviewSection" class="section">
+            <h2>Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3 id="totalKeysCount">0</h3>
+                    <p>Total Keys</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalBorrowersCount">0</h3>
+                    <p>Borrowers</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="notReturnedCount">0</h3>
+                    <p>Not Return</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="totalTransactionsCount">0</h3>
+                    <p>Total Transactions</p>
+                </div>
+            </div>
+
+            <!-- Recent Activity Table -->
+            <div class="section">
+                <div class="section-header recent-activity-header">
+                    <h3>Recent Activity</h3>
+                    <div class="recent-activity-actions">
+                        <button id="recentActivityExportExcelBtn" class="btn btn-secondary btn-small" type="button">
+                            Export Excel
+                        </button>
+                        <button id="recentActivityExportPdfBtn" class="btn btn-secondary btn-small" type="button">
+                            Export PDF
+                        </button>
+                    </div>
+                </div>
+                <div class="search-container recent-activity-search">
+                    <input type="text" id="recentActivitySearch" placeholder="Search by name, key, or action..." class="search-input">
+                    <label class="search-date-group" for="recentActivityDateFrom">
+                        <span>From</span>
+                        <input type="date" id="recentActivityDateFrom" class="search-input" aria-label="Recent activity start date">
+                    </label>
+                    <label class="search-date-group" for="recentActivityDateTo">
+                        <span>To</span>
+                        <input type="date" id="recentActivityDateTo" class="search-input" aria-label="Recent activity end date">
+                    </label>
+                    <button id="recentActivitySearchBtn" class="btn btn-small recent-activity-search-btn">Search</button>
+                </div>
+                <p id="recentActivityMeta" class="text-muted recent-activity-meta"></p>
+                <div class="table-container table-scroll">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Borrower</th>
+                                <th>Key</th>
+                                <th>Locker</th>
+                                <th>Status</th>
+                                <th>Date Borrowed</th>
+                                <th>Time Borrowed</th>
+                                <th>Date Returned</th>
+                                <th>Time Returned</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityTableBody">
+                            <!-- Activity rows will be dynamically added -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Keys Overview -->
+            <div class="section keys-overview-section">
+                <div class="section-header keys-overview-header">
+                    <div class="keys-overview-title">
+                        <h3>Keys Status</h3>
+                        <span class="keys-live-badge" aria-live="polite">
+                            <span class="keys-live-dot" aria-hidden="true"></span>
+                            Live
+                        </span>
+                    </div>
+                    <div class="keys-overview-actions">
+                        <button id="keysFullscreenBtn" class="btn btn-secondary btn-small" type="button" aria-pressed="false">
+                            Full Screen
+                        </button>
+                        <div class="keys-legend" aria-label="Key status legend">
+                            <span class="legend-item">
+                                <span class="legend-dot legend-available" aria-hidden="true"></span>
+                                Available
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-dot legend-borrowed" aria-hidden="true"></span>
+                                Borrowed
+                            </span>
+                            <span class="legend-item">
+                                <span class="legend-dot legend-lost" aria-hidden="true"></span>
+                                Lost
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div id="adminKeysOverviewList" class="keys-overview-grid" role="region" aria-label="Key status list">
+                    <!-- Key status cards will be dynamically added -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section id="chartsSection" class="section">
+            <h2>Analytics</h2>
+            <div class="admin-grid">
+                <div class="admin-card">
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+         <!-- Database Section -->
+         <section id="databaseSection" class="section hidden db-view-overview">
+             <div class="section-header db-section-header">
+                 <div class="db-section-title">
+                     <h2>Database</h2>
+                     <p class="text-muted db-subtitle">Live overview and explorer for your system data.</p>
+                 </div>
+                 <div class="db-section-actions">
+                    <div class="db-section-meta">
+                        <label class="db-live-toggle" title="Auto refresh while this page is open">
+                            <input id="dbLiveToggle" type="checkbox" checked>
+                            <span class="db-live-track" aria-hidden="true">
+                                <span class="db-live-thumb" aria-hidden="true"></span>
+                            </span>
+                            <span>Live</span>
+                        </label>
+                        <span id="dbSummaryUpdatedAt" class="text-muted db-updated-at" aria-label="Database summary updated time">Updated: —</span>
+                    </div>
+                     <div class="db-section-buttons">
+                         <button id="dbSummaryRefreshBtn" class="btn btn-small btn-secondary" type="button" title="Refresh overview + explorer">Refresh</button>
+                        <button id="backToAdminDashboardBtnDatabase" class="back-to-dashboard-btn" type="button">
+                            <span class="db-back-label-full">Back to Dashboard</span>
+                            <span class="db-back-label-short" aria-hidden="true">← Back</span>
+                        </button>
+                     </div>
+              </div>
+             </div>
+
+            <div class="db-mobile-tabs" role="tablist" aria-label="Database views">
+                <button type="button" class="db-tab is-active" data-db-view="overview" role="tab" aria-selected="true">Overview</button>
+                <button type="button" class="db-tab" data-db-view="explorer" role="tab" aria-selected="false">Explorer</button>
+            </div>
+
+             <div class="admin-grid">
+                 <!-- Summary + analytics -->
+                <div class="admin-card db-panel db-panel-overview">
+                     <div class="db-card-head">
+                         <h3 class="db-card-title">Overview</h3>
+                         <p class="text-muted db-card-subtitle">Totals and health indicators.</p>
+                     </div>
+                    <div id="dbSummaryGrid" class="stats-grid db-summary-grid" aria-label="Database summary">
+                        <div class="stat-card">
+                            <h3 id="dbUsersTotal">0</h3>
+                            <p>Users</p>
+                            <p class="text-muted">Pending: <span id="dbUsersPending">0</span></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbAdminsTotal">0</h3>
+                            <p>Admins</p>
+                            <p class="text-muted">Active: <span id="dbAdminsActive">0</span></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbKeysTotal">0</h3>
+                            <p>Keys</p>
+                            <p class="text-muted">Borrowed: <span id="dbKeysBorrowed">0</span></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbLockersTotal">0</h3>
+                            <p>Lockers</p>
+                            <p class="text-muted">Storage units</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbQrTotal">0</h3>
+                            <p>QR Codes</p>
+                            <p class="text-muted">
+                                Active: <span id="dbQrActive">0</span> •
+                                Used: <span id="dbQrUsed">0</span>
+                            </p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbTransactionsTotal">0</h3>
+                            <p>Transactions</p>
+                            <p class="text-muted">Last 7d: <span id="dbTransactions7d">0</span></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbAnnouncementsTotal">0</h3>
+                            <p>Announcements</p>
+                            <p class="text-muted">Active: <span id="dbAnnouncementsActive">0</span></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbFeedbackTotal">0</h3>
+                            <p>Feedback</p>
+                            <p class="text-muted">Unread: <span id="dbFeedbackUnread">0</span></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="dbLostReportsTotal">0</h3>
+                            <p>Lost Reports</p>
+                            <p class="text-muted">
+                                Pending: <span id="dbLostReportsOpen">0</span> •
+                                Unread: <span id="dbLostReportsUnread">0</span> •
+                                Resolved: <span id="dbLostReportsResolved">0</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="db-card-head">
+                        <h3 class="db-card-title">Analytics</h3>
+                        <p class="text-muted db-card-subtitle">Automatically updates while live mode is on.</p>
+                    </div>
+                    <div class="admin-grid db-charts-grid">
+                        <div class="admin-card db-chart-card">
+                            <h3 class="db-chart-title">Key Status</h3>
+                            <div class="db-chart-wrap">
+                                <canvas id="dbKeysStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="admin-card db-chart-card">
+                            <h3 class="db-chart-title">User Approvals</h3>
+                            <div class="db-chart-wrap">
+                                <canvas id="dbUserApprovalChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="admin-card db-chart-card">
+                            <h3 class="db-chart-title">QR Codes</h3>
+                            <div class="db-chart-wrap">
+                                <canvas id="dbQrStatusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="admin-card db-chart-card">
+                            <h3 class="db-chart-title">Transactions (7 days)</h3>
+                            <div class="db-chart-wrap">
+                                <canvas id="dbTransactionsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+
+                 <!-- Explorer -->
+                <div class="admin-card db-panel db-panel-explorer">
+                     <div class="section-header">
+                         <div class="db-explorer-head">
+                             <h3>Explorer</h3>
+                             <p class="text-muted db-explorer-subtitle">Browse, filter, and export records.</p>
+                         </div>
+                         <div class="db-actions">
+                             <span id="dbExplorerUpdatedAt" class="text-muted db-updated-at" aria-label="Database explorer updated time">Updated: —</span>
+                             <label for="dbExportModeSelect" class="db-export-label">Export</label>
+                             <select id="dbExportModeSelect" class="db-select db-export-mode-select" aria-label="Export mode">
+                                 <option value="page" selected>Selected page</option>
+                                 <option value="range">Row range</option>
+                                 <option value="all">All matching</option>
+                             </select>
+                             <div id="dbExportPageGroup" class="db-export-page-group" aria-label="Export page controls">
+                                 <input
+                                     id="dbExportPageInput"
+                                     type="number"
+                                     min="1"
+                                     step="1"
+                                     class="db-input db-export-page-input"
+                                     placeholder="Page"
+                                     aria-label="Page number to export"
+                                 >
+                                 <span id="dbExportPageMeta" class="text-muted db-export-page-meta">of 1 pages</span>
+                             </div>
+                             <input
+                                 id="dbExportRangeInput"
+                                 type="text"
+                                 class="db-input db-export-input"
+                                 placeholder="1-60"
+                                 autocomplete="off"
+                                 aria-label="Export row range"
+                             >
+                             <button id="dbExportBtn" class="btn btn-small btn-secondary" type="button">Export CSV</button>
+                         </div>
+                     </div>
+
+                     <div class="db-toolbar" aria-label="Database explorer controls">
+                         <div class="db-toolbar-grid">
+                            <div class="db-field db-field-collection">
+                                <label for="dbCollectionSelect">Collection</label>
+                                <select id="dbCollectionSelect" class="db-select" aria-label="Select collection">
+                            <option value="transactions" selected>Transactions</option>
+                            <option value="keys">Keys</option>
+                            <option value="lockers">Lockers</option>
+                            <option value="users">Users</option>
+                            <option value="qrcodes">QR Codes</option>
+                            <option value="announcements">Announcements</option>
+                            <option value="feedback">Feedback</option>
+                            <option value="lostreports">Lost Reports</option>
+                            <option value="logs">Activity Logs</option>
+                            <option value="admins">Admins</option>
+                                </select>
+                            </div>
+
+                            <div class="db-field db-field-search db-field-grow">
+                                <label for="dbSearchInput">Search</label>
+                                <input id="dbSearchInput" type="text" placeholder="Search by key, locker, user, or action…" class="db-input" autocomplete="off">
+                            </div>
+
+                            <div class="db-field db-field-filter">
+                                <label for="dbDateFromInput">Date From</label>
+                                <input id="dbDateFromInput" type="date" class="db-input" aria-label="Database start date">
+                            </div>
+
+                            <div class="db-field db-field-filter">
+                                <label for="dbDateToInput">Date To</label>
+                                <input id="dbDateToInput" type="date" class="db-input" aria-label="Database end date">
+                            </div>
+
+                             <div class="db-field db-field-filter">
+                                 <label for="dbStatusSelect">Filter</label>
+                                 <select id="dbStatusSelect" class="db-select" aria-label="Filter">
+                                     <option value="all" selected>All</option>
+                                 </select>
+                             </div>
+                         </div>
+                     </div>
+
+                    <p id="dbHint" class="helper-text db-hint"></p>
+                    <p id="dbExportScopeHint" class="helper-text db-hint db-export-scope-hint">
+                        Choose a page, enter a row range like <code>1-60</code>, or export all matching rows.
+                    </p>
+
+                    <div class="table-container table-scroll">
+                        <table class="data-table">
+                            <thead id="dbTableHead">
+                                <tr>
+                                    <th>Loading…</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dbTableBody">
+                                <!-- Rows will be dynamically added -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="db-pagination" aria-label="Database pagination">
+                        <button id="dbPrevPageBtn" class="btn btn-secondary btn-small" type="button">Prev</button>
+                        <span id="dbPageInfo" class="text-muted">Page 1</span>
+                        <button id="dbNextPageBtn" class="btn btn-secondary btn-small" type="button">Next</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Maintenance Section -->
+        <section id="maintenanceSection" class="section hidden">
+            <div class="section-header">
+                <h2>Maintenance</h2>
+                <button id="backToAdminDashboardBtnMaintenance" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+
+            <div class="admin-card maintenance-card">
+                <div class="maintenance-grid">
+                    <div class="maintenance-form">
+                        <div class="maintenance-row">
+                            <label class="theme-toggle maintenance-toggle">
+                                <input id="maintenanceEnabledToggle" type="checkbox" aria-label="Enable maintenance mode">
+                                <span class="toggle-track" aria-hidden="true">
+                                    <span class="toggle-thumb" aria-hidden="true"></span>
+                                </span>
+                                <span>Maintenance Mode</span>
+                            </label>
+                            <span id="maintenanceStatusBadge" class="maintenance-badge" aria-label="Maintenance status">OFF</span>
+                        </div>
+
+                         <p class="helper-text">
+                             When enabled, teachers will see a popup message and QR scanning will be temporarily unavailable.
+                         </p>
+                        <div id="maintenanceApiNotice" class="maintenance-api-notice hidden" role="status" aria-live="polite"></div>
+
+                         <div class="form-group">
+                             <label for="maintenanceTitleInput">Title (optional)</label>
+                             <input id="maintenanceTitleInput" type="text" placeholder="System Maintenance" maxlength="80">
+                         </div>
+
+                        <div class="form-group">
+                            <label for="maintenanceMessageInput">Message (optional)</label>
+                            <textarea id="maintenanceMessageInput" rows="4" placeholder="The system is temporarily unavailable while we perform maintenance. Please try again later." maxlength="800"></textarea>
+                        </div>
+
+                        <div class="maintenance-actions">
+                            <span id="maintenanceUpdatedAt" class="text-muted">Last updated: —</span>
+                            <div class="maintenance-actions-buttons">
+                                <button id="maintenanceResetBtn" class="btn btn-secondary btn-small" type="button">Default message</button>
+                                <button id="maintenanceSaveBtn" class="btn btn-small" type="button">Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="maintenance-preview">
+                        <h3>Preview (users)</h3>
+                        <div class="maintenance-preview-card">
+                            <h4 id="maintenancePreviewTitle">System Maintenance</h4>
+                            <p id="maintenancePreviewMessage" class="text-muted">
+                                The system is temporarily unavailable while we perform maintenance. Please try again later.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Manage Keys Section -->
+        <section id="manageKeysSection" class="section hidden">
+            <div class="section-header">
+                <h2>Manage Keys</h2>
+                <button id="backToAdminDashboardBtn" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+            <div class="admin-card">
+                <div class="manage-keys-toolbar">
+                    <button id="addLockerBtn" class="btn btn-success">Add New Locker</button>
+                    <button id="exportAllQrPdfBtn" class="btn btn-secondary" type="button">Export All QR Codes PDF</button>
+                </div>
+                <div id="keysManagementList" class="locker-groups keys-scroll">
+                    <!-- Keys management will be dynamically added -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Manage QR Codes Section -->
+        <section id="manageQRCodesSection" class="section hidden">
+            <div class="section-header">
+                <h2>Manage QR Codes</h2>
+                <button id="backToAdminDashboardBtn5" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+            
+            <div class="admin-card">
+                <div class="search-container">
+                    <input type="text" id="qrcodeSearch" placeholder="Search by Key ID or Room..." class="search-input">
+                    <button class="btn btn-small" onclick="displayQRCodesManagement()">Search</button>
+                </div>
+
+                <div id="qrcodeStatusToggleBar" class="locker-toggle-bar" aria-label="QR code status filters">
+                    <button type="button" class="locker-toggle-btn active" data-qrcode-status="all">All</button>
+                    <button type="button" class="locker-toggle-btn" data-qrcode-status="active">Active</button>
+                    <button type="button" class="locker-toggle-btn" data-qrcode-status="used">Used</button>
+                </div>
+                
+                <div id="qrcodesList" class="admin-grid activity-scroll">
+                    <!-- QR codes will be dynamically added here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settingsSection" class="section hidden">
+            <div class="section-header">
+                <h2>Settings</h2>
+                <button id="backToAdminDashboardBtn2" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+            <div class="admin-grid">
+                <div id="systemConfigCard" class="admin-card system-config-card">
+                    <div class="system-config-header">
+                        <div>
+                            <h3>System Configuration</h3>
+                            <p>Configure system settings and preferences</p>
+                        </div>
+                        <span id="systemConfigConnectionBadge" class="status-chip system-config-badge is-checking">Checking...</span>
+                    </div>
+                    <div class="system-config-grid">
+                        <div class="system-config-item">
+                            <span class="system-config-label">Backend API</span>
+                            <span id="systemConfigApiStatus" class="system-config-value">Checking...</span>
+                            <span id="systemConfigApiMeta" class="system-config-detail">Waiting for live response...</span>
+                        </div>
+                        <div class="system-config-item">
+                            <span class="system-config-label">Locker Controller</span>
+                            <span id="systemConfigControllerStatus" class="system-config-value">Checking...</span>
+                            <span id="systemConfigControllerMeta" class="system-config-detail">Waiting for controller ping...</span>
+                        </div>
+                        <div class="system-config-item">
+                            <span class="system-config-label">QR Borrow Flow</span>
+                            <span id="systemConfigQrStatus" class="system-config-value">Checking...</span>
+                            <span id="systemConfigQrMeta" class="system-config-detail">Waiting for QR coverage data...</span>
+                        </div>
+                        <div class="system-config-item">
+                            <span class="system-config-label">Lockers</span>
+                            <span id="systemConfigLockerStatus" class="system-config-value">Checking...</span>
+                            <span id="systemConfigLockerMeta" class="system-config-detail">Waiting for locker mapping data...</span>
+                        </div>
+                        <div class="system-config-item">
+                            <span class="system-config-label">Maintenance</span>
+                            <span id="systemConfigMaintenanceStatus" class="system-config-value">Checking...</span>
+                            <span id="systemConfigMaintenanceMeta" class="system-config-detail">Waiting for maintenance status...</span>
+                        </div>
+                    </div>
+                    <p id="systemConfigStatusNote" class="helper-text system-config-note">Checking live connection status...</p>
+                    <div class="system-config-actions">
+                        <div class="system-config-status-meta">
+                            <span id="systemConfigLastChecked" class="text-muted system-config-last-checked">Last checked: —</span>
+                            <span class="text-muted system-config-live-hint">Live auto-refresh every 5 seconds while Settings is open.</span>
+                        </div>
+                        <div class="system-config-buttons">
+                            <button id="refreshSystemConfigBtn" class="btn btn-small btn-secondary" type="button">Refresh Status</button>
+                            <button id="openSystemConfigBtn" class="btn btn-small btn-secondary" type="button">Configure</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="accessQrCard" class="admin-card system-config-card access-qr-card">
+                    <div class="system-config-header">
+                        <div>
+                            <h3>Access QR Pack</h3>
+                            <p>Ready-to-share QR codes for the Public App URL and the fast ESP Portal URL.</p>
+                        </div>
+                        <span class="status-chip system-config-badge is-connected">Static QR</span>
+                    </div>
+                    <div class="access-qr-actions">
+                        <button id="refreshAccessQrBtn" class="btn btn-small btn-secondary" type="button">Refresh QR Pack</button>
+                        <button id="exportAccessQrPdfBtn" class="btn btn-small btn-secondary" type="button">Export PDF</button>
+                    </div>
+                    <p id="accessQrStatusNote" class="helper-text system-config-note">Loading access QR pack...</p>
+                    <div id="accessQrList" class="access-qr-grid">
+                        <div class="access-qr-empty">Preparing QR previews...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="admin-card mt-3">
+                <div class="section-header">
+                    <h3>Account Approvals</h3>
+                    <button id="refreshApprovalsBtn" class="btn btn-small btn-secondary">Refresh</button>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="approvalsSearch" placeholder="Search pending approvals..." class="search-input">
+                </div>
+                <div id="approvalsList" class="admin-grid activity-scroll">
+                    <!-- Pending approvals will be dynamically added here -->
+                </div>
+            </div>
+            <div class="admin-card mt-3">
+                <div class="section-header">
+                    <h3>User Management</h3>
+                    <button id="addUserBtn" class="btn btn-small btn-success">Add User</button>
+                </div>
+                <div class="search-container">
+                    <input type="text" id="userSearch" placeholder="Search users..." class="search-input">
+                </div>
+                <div id="usersList" class="admin-grid">
+                    <!-- Users list -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Manage Admins Section -->
+        <section id="manageAdminsSection" class="section hidden">
+            <div class="section-header">
+                <h2>Manage Admin Accounts</h2>
+                <button id="backToAdminDashboardBtn3" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+            <div class="admin-card">
+                <div class="search-container">
+                    <input type="text" id="adminSearch" placeholder="Search admins..." class="search-input">
+                    <button id="addAdminBtn" class="btn btn-small btn-success">Add Admin</button>
+                </div>
+                <div id="adminsList" class="admin-grid activity-scroll">
+                    <!-- Admin accounts will be dynamically added -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Announcements Section -->
+        <section id="announcementsSection" class="section hidden">
+            <div class="section-header">
+                <h2>Announcements</h2>
+                <button id="backToAdminDashboardBtn7" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+
+            <div class="admin-card">
+                <h3>Create Notification</h3>
+                <div class="form-group">
+                    <label for="announcementMessage">Message</label>
+                    <textarea id="announcementMessage" rows="3" placeholder="Type your announcement..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="announcementImageInput">Image (Optional)</label>
+                    <input type="file" id="announcementImageInput" accept="image/png,image/jpeg,image/webp,image/gif">
+                    <div id="announcementImagePreview" class="announcement-image-preview hidden"></div>
+                    <p class="helper-text">Tip: Use small images for faster loading on phones.</p>
+                </div>
+                <button id="announceBtn" class="btn btn-success">Announce</button>
+            </div>
+
+            <div class="admin-card mt-3">
+                <h3>Popup Banner (Image Only)</h3>
+                <p class="helper-text">Shows automatically on the teacher dashboard until they close it.</p>
+                <div class="form-group">
+                    <label for="popupImageInput">Popup Image</label>
+                    <input type="file" id="popupImageInput" accept="image/png,image/jpeg,image/webp,image/gif">
+                    <div id="popupImagePreview" class="announcement-image-preview hidden"></div>
+                </div>
+                <button id="publishPopupBtn" class="btn btn-success">Publish Popup</button>
+            </div>
+
+            <div class="admin-card mt-3">
+                <div class="section-header">
+                    <h3>Published Announcements</h3>
+                    <button id="refreshAnnouncementsBtn" class="btn btn-small btn-secondary">Refresh</button>
+                </div>
+                <div id="adminAnnouncementsList" class="admin-grid activity-scroll">
+                    <!-- Announcements will be dynamically added -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Activity Logs Section -->
+        <section id="activityLogsSection" class="section hidden">
+            <div class="section-header">
+                <h2>Activity Logs</h2>
+                <button id="backToAdminDashboardBtn4" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+            <div class="search-container">
+                <input type="text" id="logsSearch" placeholder="Search logs by name, key, or action..." class="search-input">
+                <button id="logsSearchBtn" class="btn btn-small">Search</button>
+            </div>
+            <div class="logs-filter-bar" aria-label="Activity log filters">
+                <button id="logsFilterAll" type="button" class="logs-filter-btn active">All</button>
+                <button id="logsFilterPhotos" type="button" class="logs-filter-btn">Profile Photos</button>
+            </div>
+            <div id="activityLogsList" class="admin-grid activity-scroll">
+                <!-- Activity logs will be dynamically added -->
+            </div>
+        </section>
+
+        <!-- Lost Reports Section -->
+        <section id="lostReportsSection" class="section hidden">
+            <div class="section-header">
+                <h2>Lost Reports</h2>
+                <button id="backToAdminDashboardBtnLostReports" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+            <div class="admin-card">
+                <div class="search-container">
+                    <input type="text" id="lostReportsSearch" placeholder="Search by key ID, room, locker, building, or reporter email..." class="search-input">
+                    <select id="lostReportsStatus" class="form-control" aria-label="Lost report status filter">
+                        <option value="all" selected>All status</option>
+                        <option value="pending">Pending</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                    <select id="lostReportsRead" class="form-control" aria-label="Lost report read filter">
+                        <option value="all" selected>All</option>
+                        <option value="unread">Unread</option>
+                        <option value="read">Read</option>
+                    </select>
+                    <button id="lostReportsSearchBtn" class="btn btn-small">Search</button>
+                    <button id="lostReportsRefreshBtn" class="btn btn-small btn-secondary">Refresh</button>
+                </div>
+                <div class="lost-admin-meta">
+                    <span id="lostReportsUpdatedAt" class="text-muted">Updated: —</span>
+                    <span id="lostReportsCountInfo" class="text-muted"></span>
+                </div>
+                <div id="lostReportsList" class="admin-grid activity-scroll" aria-label="Lost reports list">
+                    <!-- Lost report cards will be dynamically added -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Feedback Section -->
+        <section id="feedbackSection" class="section hidden">
+            <div class="section-header">
+                <h2>User Feedback</h2>
+                <button id="backToAdminDashboardBtn6" class="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+            <div class="admin-card">
+                <div class="search-container">
+                    <input type="text" id="feedbackSearch" placeholder="Search feedback by message or email..." class="search-input">
+                    <select id="feedbackStatus" class="form-control">
+                        <option value="all">All</option>
+                        <option value="new" selected>New</option>
+                        <option value="read">Read</option>
+                    </select>
+                    <button id="feedbackSearchBtn" class="btn btn-small">Search</button>
+                </div>
+                <div id="feedbackList" class="admin-grid activity-scroll">
+                    <!-- Feedback cards will be dynamically added -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Navigation Drawer -->
+    <div id="navDrawer" class="nav-drawer" data-nav-drawer aria-hidden="true">
+        <div class="nav-drawer-overlay" data-nav-close></div>
+        <div class="nav-drawer-panel" role="dialog" aria-modal="true" aria-label="Admin menu" tabindex="-1">
+            <div class="nav-drawer-header">
+                <div>
+                    <div class="nav-drawer-title">Admin Menu</div>
+                    <div id="navDrawerSubtitle" class="nav-drawer-subtitle"></div>
+                </div>
+                <button type="button" class="nav-drawer-close" data-nav-close aria-label="Close menu">
+                    <svg class="nav-toggle-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.29 19.71 2.88 18.29 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"></path>
+                    </svg>
+                </button>
+            </div>
+            <nav class="nav-drawer-menu" aria-label="Admin navigation">
+                <button id="adminOverviewBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 3l9 8h-3v10h-5v-6H11v6H6V11H3l9-8z"></path>
+                    </svg>
+                    Dashboard
+                </button>
+                <button id="manageKeysBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"></path>
+                    </svg>
+                    Manage Keys
+                </button>
+                <button id="manageQRCodesBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm10 0h2v2h-2v-2zm0 4h2v2h-2v-2zm4-4h2v2h-2v-2zm0 4h2v2h-2v-2zm-4 4h6v-6h-2v4h-4v2z"></path>
+                    </svg>
+                    Manage QR Codes
+                </button>
+                <button id="settingsBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M19.14 12.94c0.04-0.3 0.06-0.61 0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14 0.23-0.41 0.12-0.61l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39 0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4 2.81c-0.04-0.24-0.24-0.41-0.48-0.41h-3.84c-0.24 0-0.43 0.17-0.47 0.41L9.25 5.35C8.66 5.59 8.12 5.92 7.63 6.29L5.24 5.33c-0.22-0.08-0.47 0-0.59 0.22L2.74 8.87C2.62 9.08 2.66 9.34 2.86 9.48l2.03 1.58C4.84 11.36 4.8 11.69 4.8 12s0.02 0.64 0.07 0.94l-2.03 1.58c-0.18 0.14-0.23 0.41-0.12 0.61l1.92 3.32c0.12 0.22 0.37 0.29 0.59 0.22l2.39-0.96c0.5 0.38 1.03 0.7 1.62 0.94l0.36 2.54c0.05 0.24 0.24 0.41 0.48 0.41h3.84c0.24 0 0.44-0.17 0.47-0.41l0.36-2.54c0.59-0.24 1.13-0.56 1.62-0.94l2.39 0.96c0.22 0.08 0.47 0 0.59-0.22l1.92-3.32c0.12-0.22 0.07-0.47-0.12-0.61l-2.03-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6s3.6 1.62 3.6 3.6s-1.62 3.6-3.6 3.6z"></path>
+                    </svg>
+                    Settings
+                </button>
+                <button id="databaseBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M20 13H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-6c0-.55-.45-1-1-1zM7 19c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM20 3H4c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h16c.55 0 1-.45 1-1V4c0-.55-.45-1-1-1zM7 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"></path>
+                    </svg>
+                    Database
+                </button>
+                <button id="maintenanceBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M22.7 19l-9.1-9.1c.3-.7.4-1.4.4-2.1 0-3.3-2.7-6-6-6-1.1 0-2.1.3-3 .8l3.3 3.3-2.1 2.1-3.3-3.3c-.5.9-.8 1.9-.8 3 0 3.3 2.7 6 6 6 .7 0 1.4-.1 2.1-.4l9.1 9.1c.4.4 1 .4 1.4 0l2.1-2.1c.4-.4.4-1 0-1.4z"></path>
+                    </svg>
+                    Maintenance
+                </button>
+                <button id="manageAdminsBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V21h14v-4.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V21h6v-4.5c0-2.33-4.67-3.5-7-3.5z"></path>
+                    </svg>
+                    Manage Admins
+                </button>
+                <button id="announcementsBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"></path>
+                    </svg>
+                    Announcements
+                </button>
+                <button id="lostReportsBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM12 17.3c-.72 0-1.3-.58-1.3-1.3 0-.72.58-1.3 1.3-1.3.72 0 1.3.58 1.3 1.3 0 .72-.58 1.3-1.3 1.3zm1-4.3h-2V7h2v6z"></path>
+                    </svg>
+                    Lost Reports
+                </button>
+                <button id="feedbackBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"></path>
+                    </svg>
+                    Feedback
+                </button>
+                <button id="activityLogsBtn" class="menu-btn" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"></path>
+                    </svg>
+                    Activity Logs
+                </button>
+                <button id="adminLogoutBtn" class="menu-btn logout" type="button">
+                    <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"></path>
+                    </svg>
+                    Logout
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Admin Modals -->
+
+    <!-- Database Record Modal -->
+    <div id="dbJsonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Record</h3>
+                <button class="close close-db-json">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre id="dbJsonPre" class="db-json-pre" aria-label="Record JSON"></pre>
+            </div>
+            <div class="modal-footer">
+                <button id="dbCopyJsonBtn" class="btn btn-secondary" type="button">Copy JSON</button>
+                <button class="btn btn-secondary close-db-json" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lost Report Modal -->
+    <div id="lostReportModal" class="modal lost-report-modal" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="lostReportModalTitle">Lost Report</h3>
+                <button class="close close-lost-report" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="lost-report-modal-grid">
+                    <div>
+                        <div id="lostReportModalDetails" class="details-list" aria-label="Lost report details"></div>
+                    </div>
+                    <div class="lost-report-modal-form">
+                        <div class="form-group">
+                            <label for="lostReportReplyInput">Reply to teacher (optional)</label>
+                            <textarea id="lostReportReplyInput" rows="6" maxlength="1200" placeholder="Type your reply..."></textarea>
+                            <p class="helper-text">Tip: This reply will appear to the teacher in their Report Lost page.</p>
+                        </div>
+
+                        <div class="lost-report-modal-controls">
+                            <div class="form-group">
+                                <label for="lostReportStatusSelect">Status</label>
+                                <select id="lostReportStatusSelect" class="form-control">
+                                    <option value="pending">Pending</option>
+                                    <option value="resolved">Resolved</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="lostReportResolutionNoteInput">Resolution note (optional)</label>
+                                <textarea id="lostReportResolutionNoteInput" rows="3" maxlength="400" placeholder="Optional note for resolution..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="lost-report-modal-actions">
+                            <button id="lostReportDeleteBtn" class="btn btn-danger btn-small hidden" type="button">Delete</button>
+                            <button id="lostReportMarkReadBtn" class="btn btn-secondary btn-small" type="button">Mark as Read</button>
+                            <button id="lostReportSaveBtn" class="btn btn-success" type="button">Save</button>
+                        </div>
+                        <p id="lostReportModalNotice" class="helper-text"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-lost-report" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Key Modal -->
+    <div id="addKeyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Key</h3>
+                <button class="close close-add-key">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="addKeyId">Key ID (Format: KEY001)</label>
+                    <input type="text" id="addKeyId" placeholder="KEY001" required pattern="KEY\d{3}" title="Format: KEY001 to KEY999">
+                </div>
+                <p class="helper-text">Key IDs must be unique across all lockers.</p>
+                <div class="form-group">
+                    <label for="addKeyLocker">Locker</label>
+                    <input type="text" id="addKeyLocker" placeholder="Locker 1" list="lockerOptionsList">
+                </div>
+                <p class="helper-text">Use an existing locker name so the QR scan opens the correct hardware lock.</p>
+                <div class="form-group">
+                    <label for="addKeyRoom">Room Name</label>
+                    <input type="text" id="addKeyRoom" placeholder="Room 101" required>
+                </div>
+                <div class="form-group">
+                    <label for="addKeyBuilding">Building (Optional)</label>
+                    <input type="text" id="addKeyBuilding" placeholder="Main Building">
+                </div>
+                <div class="form-group">
+                    <label for="addKeyDescription">Description (Optional)</label>
+                    <textarea id="addKeyDescription" placeholder="Key description" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmAddKeyBtn" class="btn btn-success">Add Key</button>
+                <button class="btn btn-secondary close-add-key">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Locker Modal -->
+    <div id="addLockerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Locker</h3>
+                <button class="close close-add-locker">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="addLockerName">Locker Name</label>
+                    <input type="text" id="addLockerName" placeholder="Locker 3" required>
+                </div>
+                <div class="form-group">
+                    <label for="addLockerHardwareNumber">Hardware Lock Number</label>
+                    <input type="number" id="addLockerHardwareNumber" placeholder="3" min="1" inputmode="numeric">
+                </div>
+                <p class="text-muted" style="font-size: 13px; margin-top: 6px;">
+                    Leave the hardware number blank to auto-assign the next available ESP32 lock.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmAddLockerBtn" class="btn btn-success">Add Locker</button>
+                <button class="btn btn-secondary close-add-locker">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Key Modal -->
+    <div id="editKeyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Key</h3>
+                <button class="close close-edit-key">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editKeyId">Key ID</label>
+                    <input type="text" id="editKeyId" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="editKeyLocker">Locker</label>
+                    <input type="text" id="editKeyLocker" placeholder="Locker 1" list="lockerOptionsList">
+                </div>
+                <div class="form-group">
+                    <label for="editKeyRoom">Room Name</label>
+                    <input type="text" id="editKeyRoom" required>
+                </div>
+                <div class="form-group">
+                    <label for="editKeyBuilding">Building</label>
+                    <input type="text" id="editKeyBuilding">
+                </div>
+                <div class="form-group">
+                    <label for="editKeyDescription">Description</label>
+                    <textarea id="editKeyDescription" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmEditKeyBtn" class="btn btn-success">Update Key</button>
+                <button class="btn btn-secondary close-edit-key">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Key Modal -->
+    <div id="deleteKeyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Key</h3>
+                <button class="close close-delete-key">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete key <strong id="deleteKeyId"></strong>?</p>
+                <p class="text-danger">This action cannot be undone. All associated QR codes will also be deleted.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmDeleteKeyBtn" class="btn btn-danger">Delete</button>
+                <button id="cancelDeleteKeyBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate QR Code Modal -->
+    <div id="generateQRModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Generate QR Code</h3>
+                <button class="close close-generate-qr">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="qrKeyId">Key ID</label>
+                    <input type="text" id="qrKeyId" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="qrRoom">Room</label>
+                    <input type="text" id="qrRoom" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Mode</label>
+                    <input type="text" value="Auto Borrow/Return (Single QR)" readonly>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmGenerateQRBtn" class="btn btn-success">Generate QR Code</button>
+                <button class="btn btn-secondary close-generate-qr">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Display Modal -->
+    <div id="qrCodeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>QR Code Generated</h3>
+                <button class="close close-qr-code">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="qr-code-container">
+                    <img id="generatedQRCode" alt="Generated QR Code" class="qr-code-image">
+                    <div class="qr-details">
+                        <p><strong>Key ID:</strong> <span id="qrKeyDisplay"></span></p>
+                        <p><strong>Room:</strong> <span id="qrRoomDisplay"></span></p>
+                        <p><strong>Mode:</strong> <span id="qrModeDisplay"></span></p>
+                        <p><strong>Validity:</strong> <span id="qrValidityDisplay"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="downloadQRBtn" class="btn btn-success">Download QR Code</button>
+                <button id="printQRBtn" class="btn btn-secondary">Print</button>
+                <button class="btn btn-secondary close-qr-code">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div id="addUserModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="close close-add-user">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newUserFirstName">First Name</label>
+                    <input type="text" id="newUserFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="newUserLastName">Last Name</label>
+                    <input type="text" id="newUserLastName" required>
+                </div>
+                <div class="form-group">
+                    <label for="newUserEmail">Email</label>
+                    <input type="email" id="newUserEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="newUserPassword">Password</label>
+                    <input type="password" id="newUserPassword" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmAddUserBtn" class="btn btn-success">Add User</button>
+                <button class="btn btn-secondary close-add-user">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset User Password Modal -->
+    <div id="resetUserPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset User Password</h3>
+                <button class="close close-reset-user">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Set a new password for <strong id="resetUserEmail"></strong>.</p>
+                <div class="form-group">
+                    <label for="resetUserPassword">New Password</label>
+                    <input type="password" id="resetUserPassword" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmResetUserPasswordBtn" class="btn btn-success">Reset Password</button>
+                <button class="btn btn-secondary close-reset-user">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <datalist id="lockerOptionsList"></datalist>
+
+    <!-- Add Admin Modal -->
+    <div id="addAdminModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Admin</h3>
+                <button class="close close-add-admin">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="newAdminUsername">Username</label>
+                    <input type="text" id="newAdminUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="newAdminFullName">Full Name</label>
+                    <input type="text" id="newAdminFullName" required>
+                </div>
+                <div class="form-group">
+                    <label for="newAdminEmail">Email</label>
+                    <input type="email" id="newAdminEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="newAdminPassword">Password</label>
+                    <input type="password" id="newAdminPassword" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmAddAdminBtn" class="btn btn-success">Add Admin</button>
+                <button class="btn btn-secondary close-add-admin">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Admin Password Modal -->
+    <div id="resetAdminPasswordModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Reset Admin Password</h3>
+                <button class="close close-reset-admin">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Set a new password for <strong id="resetAdminLabel"></strong>.</p>
+                <div class="form-group">
+                    <label for="resetAdminPassword">New Password</label>
+                    <input type="password" id="resetAdminPassword" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmResetAdminPasswordBtn" class="btn btn-success">Reset Password</button>
+                <button class="btn btn-secondary close-reset-admin">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Confirm Modal -->
+    <div id="logoutConfirmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Logout</h3>
+                <button class="close close-logout-confirm">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to log out?</p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmLogoutBtn" class="btn btn-danger">Yes, Logout</button>
+                <button id="cancelLogoutBtn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="../js/theme.js?v=20260207_2"></script>
+    <script src="../js/nav-drawer.js?v=20260207_1"></script>
+    <script src="../js/idle-logout.js?v=20260212_2"></script>
+    <script src="../js/admin-script.js?v=20260525_04"></script>
+</body>
+</html>
