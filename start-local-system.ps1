@@ -608,18 +608,45 @@ if (-not [string]::IsNullOrWhiteSpace($startupPhoneUrl) -and $startupPhoneUrl -n
     $env:APP_BASE_URL = ("http://localhost:{0}" -f $httpPort)
 }
 
-Write-Step 'Checking MongoDB service...'
-$mongoService = Get-Service -Name 'MongoDB' -ErrorAction SilentlyContinue
-if ($mongoService) {
-    if ($mongoService.Status -ne 'Running') {
-        Start-Service -Name 'MongoDB'
-        Start-Sleep -Seconds 2
-        Write-Host 'MongoDB service started.' -ForegroundColor Green
+Write-Step 'Checking MongoDB...'
+$mongoUri = if (-not [string]::IsNullOrWhiteSpace($env:MONGODB_URI)) {
+    $env:MONGODB_URI
+} else {
+    Get-EnvSetting -Name 'MONGODB_URI' -Fallback 'mongodb://localhost:27017/key_borrowing_system'
+}
+$usesLocalMongo = $mongoUri -match '^mongodb://(localhost|127\.0\.0\.1)(:|/)'
+$dockerReady = $false
+try {
+    & docker version --format '{{.Server.Version}}' *> $null
+    $dockerReady = $LASTEXITCODE -eq 0
+    if ($dockerReady) {
+        & docker compose version *> $null
+        $dockerReady = $LASTEXITCODE -eq 0
+    }
+} catch {
+    $dockerReady = $false
+}
+
+if ($usesLocalMongo -and $dockerReady) {
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root 'scripts\start-mongodb.ps1')
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Docker MongoDB could not be started.'
+    }
+} elseif ($usesLocalMongo) {
+    $mongoService = Get-Service -Name 'MongoDB' -ErrorAction SilentlyContinue
+    if ($mongoService) {
+        if ($mongoService.Status -ne 'Running') {
+            Start-Service -Name 'MongoDB'
+            Start-Sleep -Seconds 2
+            Write-Host 'MongoDB service started.' -ForegroundColor Green
+        } else {
+            Write-Host 'MongoDB service is already running.' -ForegroundColor Green
+        }
     } else {
-        Write-Host 'MongoDB service is already running.' -ForegroundColor Green
+        Write-Host 'Docker Desktop or the MongoDB Windows service was not found. Continuing in case MongoDB is already running another way.' -ForegroundColor Yellow
     }
 } else {
-    Write-Host 'MongoDB Windows service was not found. Continuing in case MongoDB is already running another way.' -ForegroundColor Yellow
+    Write-Host 'Using the MongoDB URI configured in public/.env.' -ForegroundColor Green
 }
 
 Write-Step 'Checking existing app server...'

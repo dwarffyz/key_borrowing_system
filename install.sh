@@ -31,7 +31,7 @@ install_system_packages() {
     log "Installing base packages with Homebrew..."
     brew install node python git || true
   else
-    warn "No supported package manager found. Install Node.js 16+, npm, Git, Python 3, and MongoDB manually."
+    warn "No supported package manager found. Install Node.js 16+, npm, Git, and Python 3 manually."
   fi
 }
 
@@ -62,10 +62,12 @@ install_npm_packages() {
 }
 
 check_mongodb() {
-  if have mongod; then
-    log "MongoDB binary found."
+  if have docker && docker info >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
+    "$ROOT_DIR/scripts/start-mongodb.sh"
+  elif have mongod; then
+    warn "Docker is unavailable; using an existing local MongoDB installation instead."
   else
-    warn "MongoDB was not found. Install MongoDB Community Server or set MONGODB_URI to MongoDB Atlas before starting."
+    warn "Docker is unavailable. Install and start Docker (recommended), or set MONGODB_URI to MongoDB Atlas before starting."
   fi
 }
 
@@ -80,4 +82,3 @@ main() {
 }
 
 main "$@"
-

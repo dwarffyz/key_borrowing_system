@@ -21,18 +21,20 @@ Check `public/.env`:
 MONGODB_URI=mongodb://localhost:27017/key_borrowing_system
 ```
 
-Start MongoDB:
+Start MongoDB with Docker:
 
 ```bash
-sudo systemctl start mongod
+docker compose up -d mongodb
+docker compose logs -f mongodb
 ```
 
 Windows:
 
 ```powershell
-Get-Service MongoDB
-Start-Service MongoDB
+powershell -ExecutionPolicy Bypass -File .\scripts\start-mongodb.ps1
 ```
+
+If Docker is not running, start Docker Desktop first. MongoDB Atlas also works when `MONGODB_URI` in `public/.env` is set to its Atlas connection string.
 
 ## Login Does Not Work
 
@@ -84,4 +86,3 @@ Log out and log back in.
 ## ESP Flash Fails
 
 See [docs/ESP_FLASHING.md](docs/ESP_FLASHING.md).
-

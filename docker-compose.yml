@@ -1,0 +1,28 @@
+name: key-borrowing-system
+
+services:
+  mongodb:
+    # Exact image tag: predictable MongoDB version on every machine.
+    image: mongo:7.0.43-jammy
+    container_name: key-borrowing-mongodb
+    restart: unless-stopped
+    command: ["mongod", "--bind_ip_all"]
+    ports:
+      # The database is intentionally available only to this computer.
+      # The Node.js application runs on the host and uses localhost:27017.
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 }).ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+volumes:
+  mongodb_data:
+    name: key-borrowing-mongodb-data
+  mongodb_config:
+    name: key-borrowing-mongodb-config

@@ -2,6 +2,8 @@
 
 ## Windows
 
+Install and open Docker Desktop first. MongoDB will run in Docker; the web app and ESP32 integration still run normally on Windows.
+
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
@@ -15,6 +17,8 @@ start-complete-system.bat
 ```
 
 ## Linux
+
+Install Docker Engine with Docker Compose v2 first.
 
 ```bash
 chmod +x install.sh start.sh flash-esp.sh
@@ -44,4 +48,3 @@ http://localhost:3000/admin
 ```
 
 Change `public/.env` before real deployment.
-

@@ -48,7 +48,8 @@ The web app lives in `public/`. The ESP32 firmware lives in `hardware/esp32-lock
 
 - Node.js 16 or newer
 - npm
-- MongoDB Community Server or MongoDB Atlas
+- Docker Desktop (Windows/macOS) or Docker Engine with Compose v2 (Linux), for the bundled MongoDB database
+- MongoDB Atlas is supported as an alternative to Docker
 - Git
 - Python 3 and pip, required for ESP serial provisioning
 - ESP-IDF, required only for ESP32 firmware build/flash
@@ -97,6 +98,23 @@ http://localhost:3000/admin
 ```
 
 Default development admin values are controlled by `public/.env`. Change them before real deployment.
+
+## MongoDB with Docker
+
+The app runs directly on the computer so it can access ESP32 networking and Windows COM ports. Only MongoDB runs in Docker. Its data is stored in persistent Docker volumes and is exposed only on `localhost:27017`.
+
+Install and start Docker Desktop (Windows/macOS), or Docker Engine with the Compose v2 plugin (Linux). Then start the app normally; the launcher starts and waits for MongoDB automatically.
+
+Useful database commands:
+
+```bash
+docker compose ps
+docker compose logs -f mongodb
+docker compose stop mongodb
+docker compose up -d mongodb
+```
+
+Do not run `docker compose down -v` unless you intentionally want to permanently delete all database data.
 
 ## Installation
 
@@ -156,8 +174,8 @@ See [docs/ESP_FLASHING.md](docs/ESP_FLASHING.md) for drivers, recovery steps, an
 
 ## Usage
 
-1. Start MongoDB.
-2. Start the app with `./start.sh` or `scripts/start.ps1`.
+1. Start Docker if you use the bundled MongoDB database.
+2. Start the app with `./start.sh` or `scripts/start.ps1`. When Docker is available, the launcher starts MongoDB automatically.
 3. Visit `/admin` and log in.
 4. Add users, keys, lockers, and hardware lock numbers.
 5. Generate QR codes.

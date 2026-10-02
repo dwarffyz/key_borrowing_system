@@ -26,7 +26,7 @@ setup-new-pc.bat
 start-complete-system.bat
 ```
 
-The Windows setup checks or installs Node.js, installs npm packages, checks MongoDB, auto-detects ESP serial ports, and writes setup summaries into `.tools/`.
+Install and start Docker Desktop before setup. The Windows setup checks Node.js, installs npm packages, starts the bundled MongoDB Docker container, auto-detects ESP serial ports, and writes setup summaries into `.tools/`.
 
 ## Linux Setup
 
@@ -40,7 +40,7 @@ chmod +x install.sh start.sh update.sh uninstall.sh flash-esp.sh
 ./start.sh
 ```
 
-Install MongoDB Community Server from MongoDB's official packages if your distribution does not provide it.
+Install Docker Engine and the Docker Compose v2 plugin. The installer starts the bundled MongoDB container automatically. MongoDB Atlas remains supported if you prefer a managed database.
 
 ### Arch Linux
 
@@ -69,7 +69,7 @@ SKIP_SYSTEM_PACKAGES=1 ./install.sh
 ./start.sh
 ```
 
-Use MongoDB Community Server, MongoDB Atlas, or Homebrew MongoDB services depending on your local setup.
+Install and start Docker Desktop. MongoDB Atlas is also supported if you prefer a managed database.
 
 ## Environment Configuration
 
@@ -132,3 +132,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\uninstall.ps1
 
 This removes installed packages and local logs only. It keeps `public/.env` and MongoDB data for safety.
 
+## Docker MongoDB
+
+MongoDB is defined in the repository's `docker-compose.yml` and persists its data in the named Docker volumes `key-borrowing-mongodb-data` and `key-borrowing-mongodb-config`.
+
+```bash
+docker compose ps
+docker compose logs -f mongodb
+docker compose stop mongodb
+docker compose up -d mongodb
+```
+
+The database port is bound to `127.0.0.1:27017`, so it is not exposed to other devices on the network. Do not use `docker compose down -v` unless you intentionally want to delete all database data.

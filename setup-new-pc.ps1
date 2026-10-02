@@ -254,27 +254,14 @@ function Test-TcpPortListening {
 }
 
 function Ensure-MongoDb {
-    $mongoService = Get-Service -Name 'MongoDB' -ErrorAction SilentlyContinue
-    if (-not $mongoService -and -not (Test-TcpPortListening -Port 27017)) {
-        Invoke-WingetInstall -Id 'MongoDB.Server' -Label 'MongoDB Server'
-        Start-Sleep -Seconds 4
-        $mongoService = Get-Service -Name 'MongoDB' -ErrorAction SilentlyContinue
+    $mongoUri = if (-not [string]::IsNullOrWhiteSpace($env:MONGODB_URI)) {
+        $env:MONGODB_URI
+    } else {
+        Get-EnvSetting -Name 'MONGODB_URI' -Fallback 'mongodb://localhost:27017/key_borrowing_system'
     }
-
-    if ($mongoService) {
-        if ($mongoService.Status -ne 'Running') {
-            Start-Service -Name 'MongoDB'
-            Start-Sleep -Seconds 2
-            $mongoService = Get-Service -Name 'MongoDB' -ErrorAction SilentlyContinue
-        }
-
-        if ($mongoService) {
-            $statusText = [string]$mongoService.Status
-        } else {
-            $statusText = 'Unknown'
-        }
-        Write-Host ("MongoDB service: {0}" -f $statusText) -ForegroundColor Green
-        Add-SummaryLine ("MongoDB service: {0}" -f $statusText)
+    if ($mongoUri -notmatch '^mongodb://(localhost|127\.0\.0\.1)(:|/)') {
+        Write-Host 'Using the MongoDB URI configured in public/.env.' -ForegroundColor Green
+        Add-SummaryLine 'MongoDB: external URI configured'
         return
     }
 
@@ -284,7 +271,27 @@ function Ensure-MongoDb {
         return
     }
 
-    throw 'MongoDB is still unavailable after setup.'
+    $dockerReady = $false
+    try {
+        & docker version --format '{{.Server.Version}}' *> $null
+        $dockerReady = $LASTEXITCODE -eq 0
+        if ($dockerReady) {
+            & docker compose version *> $null
+            $dockerReady = $LASTEXITCODE -eq 0
+        }
+    } catch {
+        $dockerReady = $false
+    }
+
+    if (-not $dockerReady) {
+        throw 'Docker Desktop is required for the bundled MongoDB database. Install and start Docker Desktop, then run setup again. Alternatively, configure a MongoDB Atlas URI in public/.env.'
+    }
+
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root 'scripts\start-mongodb.ps1')
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Docker MongoDB could not be started.'
+    }
+    Add-SummaryLine 'MongoDB: Docker container healthy'
 }
 
 function Get-DetectedSerialPorts {
@@ -383,7 +390,7 @@ try {
     Write-Host 'This will:'
     Write-Host '1) Check/install Node.js and npm'
     Write-Host '2) Install project npm packages'
-    Write-Host '3) Check/install MongoDB'
+    Write-Host '3) Start MongoDB with Docker'
     Write-Host '4) Auto-detect the ESP serial port'
     Write-Host '5) Save a setup summary for this PC'
 
