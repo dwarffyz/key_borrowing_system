@@ -103,7 +103,7 @@ Default development admin values are controlled by `public/.env`. Change them be
 
 The app runs directly on the computer so it can access ESP32 networking and Windows COM ports. Only MongoDB runs in Docker. Its data is stored in persistent Docker volumes and is exposed only on `localhost:27017`.
 
-Install and start Docker Desktop (Windows/macOS), or Docker Engine with the Compose v2 plugin (Linux). Then start the app normally; the launcher starts and waits for MongoDB automatically.
+On Windows, `setup-new-pc.ps1` automatically installs Docker Desktop with `winget` when needed, starts it, and waits for its engine. On macOS/Linux, install and start Docker Desktop or Docker Engine with Compose v2 first. Then start the app normally; the launcher starts and waits for MongoDB automatically.
 
 Useful database commands:
 

@@ -26,7 +26,7 @@ setup-new-pc.bat
 start-complete-system.bat
 ```
 
-Install and start Docker Desktop before setup. The Windows setup checks Node.js, installs npm packages, starts the bundled MongoDB Docker container, auto-detects ESP serial ports, and writes setup summaries into `.tools/`.
+The Windows setup checks Node.js, installs npm packages, installs Docker Desktop with `winget` when missing, starts the bundled MongoDB Docker container, auto-detects ESP serial ports, and writes setup summaries into `.tools/`. Docker Desktop may show a first-run agreement or require a restart; complete that prompt and run setup again if requested.
 
 ## Linux Setup
 

@@ -253,6 +253,66 @@ function Test-TcpPortListening {
     }
 }
 
+function Ensure-DockerDesktop {
+    $dockerExe = Get-CommandPath -Name 'docker.exe' -AdditionalCandidates @(
+        'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
+    )
+
+    if (-not $dockerExe) {
+        Invoke-WingetInstall -Id 'Docker.DockerDesktop' -Label 'Docker Desktop'
+        $dockerExe = Get-CommandPath -Name 'docker.exe' -AdditionalCandidates @(
+            'C:\Program Files\Docker\Docker\resources\bin\docker.exe'
+        )
+    }
+
+    if (-not $dockerExe) {
+        throw 'Docker Desktop was not found after installation. Finish its installation, then run setup again.'
+    }
+
+    $dockerDirectory = Split-Path -Parent $dockerExe
+    if ($env:Path -notlike "*$dockerDirectory*") {
+        $env:Path = "$dockerDirectory;$env:Path"
+    }
+
+    $engineReady = $false
+    try {
+        & $dockerExe version --format '{{.Server.Version}}' *> $null
+        $engineReady = $LASTEXITCODE -eq 0
+    } catch {
+        $engineReady = $false
+    }
+
+    if (-not $engineReady) {
+        $desktopExe = Get-CommandPath -Name 'Docker Desktop.exe' -AdditionalCandidates @(
+            'C:\Program Files\Docker\Docker\Docker Desktop.exe',
+            (Join-Path $env:LOCALAPPDATA 'Docker\Docker Desktop.exe')
+        )
+        if ($desktopExe) {
+            Write-Host 'Starting Docker Desktop...' -ForegroundColor Yellow
+            Start-Process -FilePath $desktopExe -WindowStyle Hidden
+        }
+
+        $deadline = (Get-Date).AddSeconds(120)
+        do {
+            Start-Sleep -Seconds 3
+            try {
+                & $dockerExe version --format '{{.Server.Version}}' *> $null
+                $engineReady = $LASTEXITCODE -eq 0
+            } catch {
+                $engineReady = $false
+            }
+        } while (-not $engineReady -and (Get-Date) -lt $deadline)
+    }
+
+    if (-not $engineReady) {
+        throw 'Docker Desktop is installed but its engine did not start. Complete any first-run prompts in Docker Desktop, then run setup again.'
+    }
+
+    Write-Host 'Docker Desktop is ready.' -ForegroundColor Green
+    Add-SummaryLine 'Docker Desktop: ready'
+    return $dockerExe
+}
+
 function Ensure-MongoDb {
     $mongoUri = if (-not [string]::IsNullOrWhiteSpace($env:MONGODB_URI)) {
         $env:MONGODB_URI
@@ -271,20 +331,10 @@ function Ensure-MongoDb {
         return
     }
 
-    $dockerReady = $false
-    try {
-        & docker version --format '{{.Server.Version}}' *> $null
-        $dockerReady = $LASTEXITCODE -eq 0
-        if ($dockerReady) {
-            & docker compose version *> $null
-            $dockerReady = $LASTEXITCODE -eq 0
-        }
-    } catch {
-        $dockerReady = $false
-    }
-
-    if (-not $dockerReady) {
-        throw 'Docker Desktop is required for the bundled MongoDB database. Install and start Docker Desktop, then run setup again. Alternatively, configure a MongoDB Atlas URI in public/.env.'
+    $dockerExe = Ensure-DockerDesktop
+    & $dockerExe compose version *> $null
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Docker Compose v2 is missing. Update Docker Desktop, then run setup again.'
     }
 
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $root 'scripts\start-mongodb.ps1')
