@@ -112,7 +112,7 @@ Linux/macOS:
 
 ## Automatic Startup
 
-Enable this only after confirming the app launches correctly once. It uses the existing local launcher, starts MongoDB through Docker when configured, and does not open a browser on startup.
+Enable this only after confirming the app launches correctly once. Windows uses the existing complete launcher, so Hybrid mode also recreates the Cloudflare tunnel and syncs the new URL to the ESP after sign-in. Linux/macOS use the local launcher. MongoDB starts through Docker when configured, and no browser opens on startup. Windows retries temporary Docker, WiFi, and Cloudflare delays; see `.tools/autostart.log` if it cannot recover.
 
 Windows (per signed-in user):
 

@@ -21,7 +21,8 @@ if (-not (Test-Path -LiteralPath $PowerShellExe)) {
 $arguments = '-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File "{0}"' -f $Launcher
 $action = New-ScheduledTaskAction -Execute $PowerShellExe -Argument $arguments -WorkingDirectory $Root
 $trigger = New-ScheduledTaskTrigger -AtLogOn -RandomDelay (New-TimeSpan -Seconds $DelaySeconds)
-$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew -ExecutionTimeLimit (New-TimeSpan -Hours 0)
+$settings = New-ScheduledTaskSettingsSet -StartWhenAvailable -MultipleInstances IgnoreNew `
+    -ExecutionTimeLimit (New-TimeSpan -Hours 0) -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 2)
 
 Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
     -Description 'Starts the BatStateU Key Borrowing System after user sign-in.' -Force | Out-Null
@@ -29,4 +30,5 @@ Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Se
 Write-Host 'Autostart is enabled.' -ForegroundColor Green
 Write-Host ("Task: {0}" -f $TaskName)
 Write-Host ("It starts about {0} seconds after sign-in without opening a browser." -f $DelaySeconds)
+Write-Host 'It retries startup when Docker, WiFi, or Cloudflare is not ready yet.' -ForegroundColor Cyan
 Write-Host 'To disable: powershell -ExecutionPolicy Bypass -File .\scripts\uninstall-autostart.ps1' -ForegroundColor Cyan

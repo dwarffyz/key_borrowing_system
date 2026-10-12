@@ -118,7 +118,7 @@ Do not run `docker compose down -v` unless you intentionally want to permanently
 
 ## Start Automatically After Restart
 
-Autostart is opt-in. It starts the local system after Windows sign-in or Linux boot without opening a browser; MongoDB is started by the normal launcher. The app must have been set up successfully once first.
+Autostart is opt-in. It starts the complete system after Windows sign-in (local app plus Cloudflare in Hybrid mode) or the local system after Linux boot, without opening a browser. MongoDB is started by the normal launcher. Windows retries temporary Docker, WiFi, and Cloudflare startup failures; its log is saved in `.tools/autostart.log`. The app must have been set up successfully once first.
 
 Windows (run once for the Windows account that will use the system):
 
