@@ -114,12 +114,12 @@ Linux/macOS:
 
 Enable this only after confirming the app launches correctly once. It restores the system after a power loss/restart: Windows uses the complete launcher, so Hybrid mode recreates the Cloudflare tunnel and syncs the new URL to the ESP after sign-in; Linux starts the local service after boot; macOS starts it after sign-in. MongoDB starts through Docker when configured, and no browser opens on startup. Windows retries temporary Docker, WiFi, and Cloudflare delays; see `.tools/autostart.log` if it cannot recover.
 
-Enable it using the main start command.
+On Windows, simply double-click `start-complete-system.bat`: it starts the system and enables recovery automatically. Double-click `stop-complete-system.bat` to stop the system and disable recovery. The switches below are only for running the PowerShell files directly.
 
 Windows (per signed-in user):
 
 ```powershell
-.\start-complete-system.bat -EnableAutostart
+powershell -ExecutionPolicy Bypass -File .\start-complete-system.ps1 -EnableAutostart
 ```
 
 Linux (systemd) or macOS (LaunchAgent):
@@ -129,10 +129,10 @@ chmod +x start-complete-system.sh stop-complete-system.sh scripts/*autostart*.sh
 ./start-complete-system.sh --enable-autostart
 ```
 
-Disable it using the main stop command:
+Disable it using the main stop command. If running PowerShell directly, use:
 
 ```powershell
-.\stop-complete-system.bat -DisableAutostart
+powershell -ExecutionPolicy Bypass -File .\stop-complete-system.ps1 -DisableAutostart
 ```
 
 ```bash

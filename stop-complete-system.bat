@@ -18,15 +18,15 @@ pause
 exit /b 1
 
 :run_winps
-"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" %*
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -DisableAutostart %*
 goto done
 
 :run_winps_sysnative
-"%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" %*
+"%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -DisableAutostart %*
 goto done
 
 :run_pwsh
-pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "%PS1%" %*
+pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -DisableAutostart %*
 goto done
 
 :done
