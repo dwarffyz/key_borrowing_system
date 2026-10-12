@@ -126,7 +126,7 @@ Linux (systemd) or macOS (LaunchAgent):
 
 ```bash
 chmod +x start-complete-system.sh stop-complete-system.sh scripts/*autostart*.sh
-./start-complete-system.sh --enable-autostart
+./start-complete-system.sh
 ```
 
 Disable it using the main stop command. If running PowerShell directly, use:
@@ -136,7 +136,7 @@ powershell -ExecutionPolicy Bypass -File .\stop-complete-system.ps1 -DisableAuto
 ```
 
 ```bash
-./stop-complete-system.sh --disable-autostart
+./stop-complete-system.sh
 ```
 
 ## Update
