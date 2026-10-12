@@ -1,3 +1,9 @@
+[CmdletBinding()]
+param(
+    [switch]$NoBrowser,
+    [switch]$NoPause
+)
+
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -828,9 +834,11 @@ if (-not [string]::IsNullOrWhiteSpace($espStaSsid)) {
 }
 Write-Host ("  - Access URLs were also saved to {0}" -f $accessFile)
 
-Start-Process ($(if ($localHttpsActive) { "https://localhost:{0}" -f $httpsPort } else { "http://localhost:{0}" -f $httpPort }))
+if (-not $NoBrowser -and $env:KBS_NO_BROWSER -ne '1') {
+    Start-Process ($(if ($localHttpsActive) { "https://localhost:{0}" -f $httpsPort } else { "http://localhost:{0}" -f $httpPort }))
+}
 
 Write-Host ''
-if ($env:KBS_NO_PAUSE -ne '1') {
+if (-not $NoPause -and $env:KBS_NO_PAUSE -ne '1') {
     Read-Host 'Press Enter to close this launcher window'
 }

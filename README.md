@@ -116,6 +116,25 @@ docker compose up -d mongodb
 
 Do not run `docker compose down -v` unless you intentionally want to permanently delete all database data.
 
+## Start Automatically After Restart
+
+Autostart is opt-in. It starts the local system after Windows sign-in or Linux boot without opening a browser; MongoDB is started by the normal launcher. The app must have been set up successfully once first.
+
+Windows (run once for the Windows account that will use the system):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-autostart.ps1
+```
+
+Linux:
+
+```bash
+chmod +x scripts/*autostart*.sh
+./scripts/install-autostart.sh
+```
+
+macOS uses the same shell command and starts after the user signs in. To turn it off, run `scripts/uninstall-autostart.ps1` on Windows or `./scripts/uninstall-autostart.sh` on Linux/macOS.
+
 ## Installation
 
 Full installation instructions are available in [INSTALLATION.md](INSTALLATION.md).

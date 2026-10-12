@@ -110,6 +110,32 @@ Linux/macOS:
 ./start.sh
 ```
 
+## Automatic Startup
+
+Enable this only after confirming the app launches correctly once. It uses the existing local launcher, starts MongoDB through Docker when configured, and does not open a browser on startup.
+
+Windows (per signed-in user):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install-autostart.ps1
+```
+
+Linux (systemd):
+
+```bash
+chmod +x scripts/*autostart*.sh
+./scripts/install-autostart.sh
+```
+
+macOS (LaunchAgent, after sign-in):
+
+```bash
+chmod +x scripts/*autostart*.sh
+./scripts/install-autostart.sh
+```
+
+Disable it with `scripts/uninstall-autostart.ps1` on Windows or `./scripts/uninstall-autostart.sh` on Linux/macOS.
+
 ## Update
 
 ```bash
