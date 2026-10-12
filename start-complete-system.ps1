@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
-    [switch]$ForceCloudflare
+    [switch]$ForceCloudflare,
+    [switch]$EnableAutostart,
+    [switch]$Autostart
 )
 
 $ErrorActionPreference = 'Stop'
@@ -61,6 +63,16 @@ function Invoke-LauncherScript {
     if ($exitCode -ne 0) {
         throw ("Launcher failed: {0} (exit {1})" -f $ScriptPath, $exitCode)
     }
+}
+
+function Enable-Autostart {
+    $installer = Join-Path $root 'scripts\install-autostart.ps1'
+    if (-not (Test-Path -LiteralPath $installer)) {
+        throw "Missing autostart installer: $installer"
+    }
+
+    Write-Step 'Enabling automatic recovery after restart...'
+    Invoke-LauncherScript -ScriptPath $installer
 }
 
 function Read-TunnelState {
@@ -254,6 +266,15 @@ $previousNoPause = $env:KBS_NO_PAUSE
 $scriptExit = 0
 
 try {
+    if ($Autostart) {
+        $env:KBS_NO_PAUSE = '1'
+        $env:KBS_NO_BROWSER = '1'
+    }
+
+    if ($EnableAutostart) {
+        Enable-Autostart
+    }
+
     $phoneAccessMode = [string](Get-EnvSetting -Name 'PHONE_ACCESS_MODE' -Fallback 'hybrid')
     $phoneAccessMode = $phoneAccessMode.Trim().ToLowerInvariant()
     if ($phoneAccessMode -notin @('pure_fast', 'hybrid')) {

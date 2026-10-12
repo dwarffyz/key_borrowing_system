@@ -1,6 +1,14 @@
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
 
+$autostartUninstaller = Join-Path $PSScriptRoot 'uninstall-autostart.ps1'
+if (Test-Path $autostartUninstaller) {
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $autostartUninstaller
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Could not disable automatic startup.'
+    }
+}
+
 $targets = @(
     (Join-Path $Root 'node_modules'),
     (Join-Path $Root 'public\node_modules'),

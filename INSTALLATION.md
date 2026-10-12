@@ -112,29 +112,32 @@ Linux/macOS:
 
 ## Automatic Startup
 
-Enable this only after confirming the app launches correctly once. Windows uses the existing complete launcher, so Hybrid mode also recreates the Cloudflare tunnel and syncs the new URL to the ESP after sign-in. Linux/macOS use the local launcher. MongoDB starts through Docker when configured, and no browser opens on startup. Windows retries temporary Docker, WiFi, and Cloudflare delays; see `.tools/autostart.log` if it cannot recover.
+Enable this only after confirming the app launches correctly once. It restores the system after a power loss/restart: Windows uses the complete launcher, so Hybrid mode recreates the Cloudflare tunnel and syncs the new URL to the ESP after sign-in; Linux starts the local service after boot; macOS starts it after sign-in. MongoDB starts through Docker when configured, and no browser opens on startup. Windows retries temporary Docker, WiFi, and Cloudflare delays; see `.tools/autostart.log` if it cannot recover.
+
+Enable it using the main start command.
 
 Windows (per signed-in user):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-autostart.ps1
+.\start-complete-system.bat -EnableAutostart
 ```
 
-Linux (systemd):
+Linux (systemd) or macOS (LaunchAgent):
 
 ```bash
-chmod +x scripts/*autostart*.sh
-./scripts/install-autostart.sh
+chmod +x start-complete-system.sh stop-complete-system.sh scripts/*autostart*.sh
+./start-complete-system.sh --enable-autostart
 ```
 
-macOS (LaunchAgent, after sign-in):
+Disable it using the main stop command:
+
+```powershell
+.\stop-complete-system.bat -DisableAutostart
+```
 
 ```bash
-chmod +x scripts/*autostart*.sh
-./scripts/install-autostart.sh
+./stop-complete-system.sh --disable-autostart
 ```
-
-Disable it with `scripts/uninstall-autostart.ps1` on Windows or `./scripts/uninstall-autostart.sh` on Linux/macOS.
 
 ## Update
 

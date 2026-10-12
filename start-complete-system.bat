@@ -18,15 +18,15 @@ pause
 exit /b 1
 
 :run_winps
-"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -ForceCloudflare
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -ForceCloudflare %*
 goto done
 
 :run_winps_sysnative
-"%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -ForceCloudflare
+"%SystemRoot%\Sysnative\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -ForceCloudflare %*
 goto done
 
 :run_pwsh
-pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -ForceCloudflare
+pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "%PS1%" -ForceCloudflare %*
 goto done
 
 :done

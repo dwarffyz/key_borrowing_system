@@ -10,6 +10,20 @@ warn() { printf '\n[warning] %s\n' "$*" >&2; }
 die() { printf '\n[error] %s\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
+case "${1:-}" in
+  --enable-autostart)
+    exec "$ROOT_DIR/scripts/install-autostart.sh"
+    ;;
+  --disable-autostart)
+    exec "$ROOT_DIR/scripts/uninstall-autostart.sh"
+    ;;
+  '')
+    ;;
+  *)
+    die "Unknown option: $1. Use --enable-autostart or --disable-autostart."
+    ;;
+esac
+
 get_env_mongodb_uri() {
   local configured_uri
   configured_uri="$(sed -nE 's/^[[:space:]]*MONGODB_URI[[:space:]]*=[[:space:]]*(.*)$/\1/p' "$ENV_FILE" | head -n 1)"

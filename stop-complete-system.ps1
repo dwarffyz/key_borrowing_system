@@ -1,3 +1,8 @@
+[CmdletBinding()]
+param(
+    [switch]$DisableAutostart
+)
+
 $ErrorActionPreference = 'Stop'
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -48,6 +53,16 @@ function Invoke-LauncherScript {
     if ($exitCode -ne 0) {
         throw ("Launcher failed: {0} (exit {1})" -f $ScriptPath, $exitCode)
     }
+}
+
+function Disable-Autostart {
+    $uninstaller = Join-Path $root 'scripts\uninstall-autostart.ps1'
+    if (-not (Test-Path -LiteralPath $uninstaller)) {
+        throw "Missing autostart uninstaller: $uninstaller"
+    }
+
+    Write-Host 'Disabling automatic recovery after restart...' -ForegroundColor Cyan
+    Invoke-LauncherScript -ScriptPath $uninstaller
 }
 
 function Get-ListeningServerPid {
@@ -138,6 +153,9 @@ $scriptExit = 0
 
 try {
     $env:KBS_NO_PAUSE = '1'
+    if ($DisableAutostart) {
+        Disable-Autostart
+    }
     Write-Host 'Stopping complete system...' -ForegroundColor Cyan
     Invoke-LauncherScript -ScriptPath (Join-Path $root 'stop-cloudflare-tunnel.ps1') -Arguments @('-NoPause')
     Stop-ManagedLocalServer

@@ -6,6 +6,10 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 log() { printf '\n[uninstall] %s\n' "$*"; }
 warn() { printf '\n[warning] %s\n' "$*" >&2; }
 
+if [[ -x "$ROOT_DIR/scripts/uninstall-autostart.sh" ]]; then
+  "$ROOT_DIR/scripts/uninstall-autostart.sh"
+fi
+
 log "Removing installed npm packages and local runtime logs..."
 rm -rf "$ROOT_DIR/node_modules" "$ROOT_DIR/public/node_modules" "$ROOT_DIR/.tools"
 

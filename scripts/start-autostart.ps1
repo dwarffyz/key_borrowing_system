@@ -25,7 +25,7 @@ $env:KBS_NO_BROWSER = '1'
 
 for ($attempt = 1; $attempt -le $AttemptCount; $attempt += 1) {
     Add-Content -Path $LogFile -Encoding UTF8 -Value ("`n[{0}] Startup attempt {1}/{2}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $attempt, $AttemptCount)
-    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Launcher *>> $LogFile
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $Launcher -Autostart *>> $LogFile
     if ($LASTEXITCODE -eq 0) {
         Add-Content -Path $LogFile -Encoding UTF8 -Value ("[{0}] System startup completed." -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
         exit 0

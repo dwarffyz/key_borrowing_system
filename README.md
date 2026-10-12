@@ -118,22 +118,30 @@ Do not run `docker compose down -v` unless you intentionally want to permanently
 
 ## Start Automatically After Restart
 
-Autostart is opt-in. It starts the complete system after Windows sign-in (local app plus Cloudflare in Hybrid mode) or the local system after Linux boot, without opening a browser. MongoDB is started by the normal launcher. Windows retries temporary Docker, WiFi, and Cloudflare startup failures; its log is saved in `.tools/autostart.log`. The app must have been set up successfully once first.
+Autostart is opt-in. It restores the app after an unexpected shutdown or restart: Windows starts the complete system after sign-in (local app plus Cloudflare in Hybrid mode), Linux starts the local service after boot, and macOS starts it after sign-in. MongoDB is started by the normal launcher. Windows retries temporary Docker, WiFi, and Cloudflare startup failures; its log is saved in `.tools/autostart.log`. The app must have been set up successfully once first.
 
-Windows (run once for the Windows account that will use the system):
+Enable it through the main start command:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install-autostart.ps1
+.\start-complete-system.bat -EnableAutostart
 ```
 
-Linux:
+Linux/macOS:
 
 ```bash
-chmod +x scripts/*autostart*.sh
-./scripts/install-autostart.sh
+chmod +x start-complete-system.sh stop-complete-system.sh scripts/*autostart*.sh
+./start-complete-system.sh --enable-autostart
 ```
 
-macOS uses the same shell command and starts after the user signs in. To turn it off, run `scripts/uninstall-autostart.ps1` on Windows or `./scripts/uninstall-autostart.sh` on Linux/macOS.
+Disable it through the main stop command:
+
+```powershell
+.\stop-complete-system.bat -DisableAutostart
+```
+
+```bash
+./stop-complete-system.sh --disable-autostart
+```
 
 ## Installation
 
