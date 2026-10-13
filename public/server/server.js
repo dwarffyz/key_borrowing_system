@@ -1930,7 +1930,7 @@ const escapeEmailHtml = (value) => String(value ?? '')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' }) => {
+const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '', securityLogoSource = '' }) => {
     const safeLink = escapeEmailHtml(resetLink);
     const safeExpiresMinutes = clampInt(expiresMinutes, RESET_TOKEN_EXPIRE_MINUTES, { min: 1, max: 1_440 });
     const brandLogo = logoSource
@@ -1939,6 +1939,9 @@ const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' })
     const watermarkLogo = logoSource
         ? `<img src="${escapeEmailHtml(logoSource)}" width="118" alt="" aria-hidden="true" style="display:block; width:118px; height:auto; border:0; opacity:0.16; filter:grayscale(1);">`
         : '';
+    const securityLogo = securityLogoSource
+        ? `<img src="${escapeEmailHtml(securityLogoSource)}" width="46" alt="Batangas State University logo" style="display:block; width:46px; height:auto; border:0; outline:none; text-decoration:none;">`
+        : '<span style="font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:62px; font-weight:700; letter-spacing:1.2px; color:#ff4252;">SECURE</span>';
 
     return `<!doctype html>
 <html lang="en">
@@ -1992,7 +1995,7 @@ const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' })
                   <td class="mobile-stack" style="vertical-align:top;">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td align="center" width="62" height="62" style="width:62px; height:62px; border:2px solid #f1293a; border-radius:14px; background-color:#230b10; color:#ff4252; font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:62px; font-weight:700; letter-spacing:1.2px;">SECURE</td>
+                        <td align="center" width="62" height="62" style="width:62px; height:62px; border:2px solid #f1293a; border-radius:14px; background-color:#230b10;">${securityLogo}</td>
                         <td style="padding-left:16px; vertical-align:middle; font-family:Arial, Helvetica, sans-serif;">
                           <div style="font-size:12px; line-height:16px; font-weight:700; letter-spacing:1.6px; color:#c7c7ca; text-transform:uppercase;">Secure Account Access</div>
                           <div class="title-text" style="padding-top:3px; font-size:30px; line-height:37px; font-weight:700; color:#ffffff;">Password <span style="color:#f52d3e;">Reset Request</span></div>
@@ -2050,6 +2053,18 @@ const getPasswordResetEmailLogoUrl = () => {
     }
 };
 
+const getPasswordResetEmailSecurityLogoUrl = () => {
+    const fallback = 'https://raw.githubusercontent.com/dwarffyz/key_borrowing_system/main/public/images/logo.png';
+    const configured = String(process.env.EMAIL_SECURITY_LOGO_URL || fallback).trim();
+
+    try {
+        const url = new URL(configured);
+        return url.protocol === 'https:' ? url.toString() : fallback;
+    } catch {
+        return fallback;
+    }
+};
+
 const sendPasswordResetEmail = async ({ to, resetLink, expiresMinutes = RESET_TOKEN_EXPIRE_MINUTES }) => {
     try {
         if (!mailTransporter) return false;
@@ -2058,7 +2073,8 @@ const sendPasswordResetEmail = async ({ to, resetLink, expiresMinutes = RESET_TO
             resetLink,
             expiresMinutes,
             // Remote HTTPS images render in Gmail without becoming attachments.
-            logoSource: getPasswordResetEmailLogoUrl()
+            logoSource: getPasswordResetEmailLogoUrl(),
+            securityLogoSource: getPasswordResetEmailSecurityLogoUrl()
         });
         const safeExpiresMinutes = clampInt(expiresMinutes, RESET_TOKEN_EXPIRE_MINUTES, { min: 1, max: 1_440 });
 
