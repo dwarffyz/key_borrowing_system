@@ -1946,7 +1946,7 @@ const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' })
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="x-apple-disable-message-reformatting">
-  <title>Password Reset Request — BatStateU Key System</title>
+  <title>Secure Password Reset — BatStateU Key System</title>
   <style>
     @media only screen and (max-width: 640px) {
       .email-shell { width: 100% !important; }
@@ -1992,7 +1992,7 @@ const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' })
                   <td class="mobile-stack" style="vertical-align:top;">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                       <tr>
-                        <td align="center" width="62" height="62" style="width:62px; height:62px; border:2px solid #f1293a; border-radius:14px; background-color:#230b10; color:#ff3546; font-family:Arial, Helvetica, sans-serif; font-size:31px; line-height:62px;">&#128274;</td>
+                        <td align="center" width="62" height="62" style="width:62px; height:62px; border:2px solid #f1293a; border-radius:14px; background-color:#230b10; color:#ff4252; font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:62px; font-weight:700; letter-spacing:1.2px;">SECURE</td>
                         <td style="padding-left:16px; vertical-align:middle; font-family:Arial, Helvetica, sans-serif;">
                           <div style="font-size:12px; line-height:16px; font-weight:700; letter-spacing:1.6px; color:#c7c7ca; text-transform:uppercase;">Secure Account Access</div>
                           <div class="title-text" style="padding-top:3px; font-size:30px; line-height:37px; font-weight:700; color:#ffffff;">Password <span style="color:#f52d3e;">Reset Request</span></div>
@@ -2003,18 +2003,18 @@ const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' })
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:28px;">
                       <tr>
                         <td align="center" bgcolor="#a80f1d" style="border:2px solid #ff4150; border-radius:999px; box-shadow:0 0 12px rgba(255,49,67,0.42);">
-                          <a href="${safeLink}" target="_blank" style="display:inline-block; padding:15px 24px; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:20px; font-weight:700; color:#ffffff; text-decoration:none;">&#8635;&nbsp;&nbsp;Reset Password&nbsp;&nbsp;&raquo;&raquo;</a>
+                          <a href="${safeLink}" target="_blank" style="display:inline-block; padding:15px 24px; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:20px; font-weight:700; letter-spacing:0.2px; color:#ffffff; text-decoration:none;">RESET PASSWORD&nbsp;&nbsp;&raquo;&raquo;</a>
                         </td>
                       </tr>
                     </table>
-                    <div style="padding-top:24px; font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:23px; color:#d8d8dc;">&#128337;&nbsp; This link will expire in <strong style="color:#ff3b4c;">${safeExpiresMinutes} minutes.</strong></div>
+                    <div style="padding-top:24px; font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:23px; color:#d8d8dc;"><span style="font-size:10px; font-weight:700; letter-spacing:1.2px; color:#f04a58; text-transform:uppercase;">Expiry notice</span><br>This link will expire in <strong style="color:#ff3b4c;">${safeExpiresMinutes} minutes.</strong></div>
                   </td>
                   <td class="watermark-cell" width="130" align="right" style="width:130px; vertical-align:bottom; padding-left:16px;">${watermarkLogo}</td>
                 </tr>
               </table>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:26px;">
                 <tr>
-                  <td style="padding:14px 16px; border-left:3px solid #c81929; background-color:#1b1c21; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:21px; color:#d1d1d5;">&#8505;&nbsp; If you did not request this, you can ignore this email.</td>
+                  <td style="padding:14px 16px; border-left:3px solid #c81929; background-color:#1b1c21; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:21px; color:#d1d1d5;"><strong style="color:#ffffff;">Security notice.</strong> If you did not request this, you can ignore this email.</td>
                 </tr>
               </table>
               <div style="padding-top:18px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; color:#a9a9b0; word-break:break-word;">If the button does not work, copy and paste this secure link into your browser:<br><a href="${safeLink}" target="_blank" style="color:#ef3b4b; text-decoration:underline;">${safeLink}</a></div>
@@ -2024,7 +2024,7 @@ const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' })
             <td class="mobile-pad" style="padding:18px 42px 24px 42px; border-top:1px solid #7a1520; background-color:#0c0d10;">
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
-                  <td class="mobile-stack mobile-center" style="font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:16px; letter-spacing:0.7px; color:#b5b5ba; text-transform:uppercase;">&#128737;&nbsp; This is an automated message from Batangas State University.<br>Please do not reply to this email.</td>
+                  <td class="mobile-stack mobile-center" style="font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:16px; letter-spacing:0.7px; color:#b5b5ba; text-transform:uppercase;">This is an automated message from Batangas State University.<br>Please do not reply to this email.</td>
                   <td class="mobile-stack mobile-center" align="right" style="padding-left:14px; font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:16px; font-weight:700; letter-spacing:1.4px; color:#ee3343; text-transform:uppercase; white-space:nowrap;">Learn&nbsp; &bull; &nbsp;Serve&nbsp; &bull; &nbsp;Innovate</td>
                 </tr>
               </table>
@@ -2038,35 +2038,34 @@ const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' })
 </html>`;
 };
 
+const getPasswordResetEmailLogoUrl = () => {
+    const fallback = 'https://raw.githubusercontent.com/dwarffyz/key_borrowing_system/main/public/images/logo2.png';
+    const configured = String(process.env.EMAIL_BRAND_LOGO_URL || fallback).trim();
+
+    try {
+        const url = new URL(configured);
+        return url.protocol === 'https:' ? url.toString() : fallback;
+    } catch {
+        return fallback;
+    }
+};
+
 const sendPasswordResetEmail = async ({ to, resetLink, expiresMinutes = RESET_TOKEN_EXPIRE_MINUTES }) => {
     try {
         if (!mailTransporter) return false;
         const from = process.env.MAIL_FROM || `BatStateU Key System <${process.env.SMTP_USER || 'no-reply@example.com'}>`;
-        let logoSource = '';
-        try {
-            // Use a normal public image URL instead of a CID attachment. This keeps
-            // logo2.png out of Gmail's attachment area while matching the reset design.
-            const assetUrl = new URL(resetLink);
-            assetUrl.pathname = '/images/logo2.png';
-            assetUrl.search = '';
-            assetUrl.hash = '';
-            logoSource = assetUrl.toString();
-        } catch {
-            // The reset link is generated by the server. If it is ever malformed,
-            // send the security email without a logo rather than failing the reset.
-            logoSource = '';
-        }
         const html = buildPasswordResetEmail({
             resetLink,
             expiresMinutes,
-            logoSource
+            // Remote HTTPS images render in Gmail without becoming attachments.
+            logoSource: getPasswordResetEmailLogoUrl()
         });
         const safeExpiresMinutes = clampInt(expiresMinutes, RESET_TOKEN_EXPIRE_MINUTES, { min: 1, max: 1_440 });
 
         await mailTransporter.sendMail({
             from,
             to,
-            subject: 'Password Reset Request — BatStateU Key System',
+            subject: 'Secure Password Reset — BatStateU Key System',
             text: `We received a request to reset your BatStateU Key System password. Your secure reset link expires in ${safeExpiresMinutes} minutes.\n\nReset password: ${resetLink}\n\nIf you did not request this, you can ignore this email.`,
             html
         });
