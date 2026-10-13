@@ -1923,24 +1923,149 @@ const buildTransactionSessionRows = (transactions, { range = null } = {}) => {
         });
 };
 
+const escapeEmailHtml = (value) => String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
+const buildPasswordResetEmail = ({ resetLink, expiresMinutes, logoSource = '' }) => {
+    const safeLink = escapeEmailHtml(resetLink);
+    const safeExpiresMinutes = clampInt(expiresMinutes, RESET_TOKEN_EXPIRE_MINUTES, { min: 1, max: 1_440 });
+    const brandLogo = logoSource
+        ? `<img src="${escapeEmailHtml(logoSource)}" width="68" alt="Batangas State University logo" style="display:block; width:68px; height:auto; border:0; outline:none; text-decoration:none;">`
+        : '';
+    const watermarkLogo = logoSource
+        ? `<img src="${escapeEmailHtml(logoSource)}" width="118" alt="" aria-hidden="true" style="display:block; width:118px; height:auto; border:0; opacity:0.16; filter:grayscale(1);">`
+        : '';
+
+    return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Password Reset Request — BatStateU Key System</title>
+  <style>
+    @media only screen and (max-width: 640px) {
+      .email-shell { width: 100% !important; }
+      .mobile-pad { padding-left: 24px !important; padding-right: 24px !important; }
+      .mobile-stack { display: block !important; width: 100% !important; }
+      .mobile-center { text-align: center !important; }
+      .watermark-cell { display: none !important; }
+      .title-text { font-size: 25px !important; line-height: 31px !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#090a0d;">
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; mso-hide:all;">A secure password reset link for your BatStateU Key System account.</div>
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; margin:0; padding:0; background-color:#090a0d;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table role="presentation" class="email-shell" width="720" cellspacing="0" cellpadding="0" border="0" style="width:720px; max-width:720px; margin:0 auto; background-color:#101115; border:1px solid #8e101b; border-radius:22px; overflow:hidden;">
+          <tr>
+            <td style="padding:0; background-color:#151014; border-bottom:3px solid #d7192a;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td class="mobile-pad" style="padding:24px 30px 20px 30px; vertical-align:middle;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td width="78" style="width:78px; vertical-align:middle;">${brandLogo}</td>
+                        <td style="vertical-align:middle; padding-left:12px; font-family:Arial, Helvetica, sans-serif;">
+                          <div style="font-size:20px; line-height:25px; font-weight:700; letter-spacing:0.4px; color:#ffffff;">BatStateU Key System</div>
+                          <div style="padding-top:3px; font-size:11px; line-height:16px; letter-spacing:1.5px; color:#e8e8ea; text-transform:uppercase;">Batangas State University</div>
+                          <div style="padding-top:2px; font-size:9px; line-height:14px; letter-spacing:1.2px; color:#a9a9af; text-transform:uppercase;">The National Engineering University</div>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td width="124" style="width:124px; background-color:#2a0a0e; border-left:1px solid #681019;">&nbsp;</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-pad" style="padding:34px 42px 28px 42px; background-color:#101115;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td class="mobile-stack" style="vertical-align:top;">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td align="center" width="62" height="62" style="width:62px; height:62px; border:2px solid #f1293a; border-radius:14px; background-color:#230b10; color:#ff3546; font-family:Arial, Helvetica, sans-serif; font-size:31px; line-height:62px;">&#128274;</td>
+                        <td style="padding-left:16px; vertical-align:middle; font-family:Arial, Helvetica, sans-serif;">
+                          <div style="font-size:12px; line-height:16px; font-weight:700; letter-spacing:1.6px; color:#c7c7ca; text-transform:uppercase;">Secure Account Access</div>
+                          <div class="title-text" style="padding-top:3px; font-size:30px; line-height:37px; font-weight:700; color:#ffffff;">Password <span style="color:#f52d3e;">Reset Request</span></div>
+                        </td>
+                      </tr>
+                    </table>
+                    <div style="padding-top:30px; font-family:Arial, Helvetica, sans-serif; font-size:19px; line-height:29px; color:#f0f0f2;">We received a request to<br><strong><em style="color:#ff3143;">reset your password.</em></strong></div>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin-top:28px;">
+                      <tr>
+                        <td align="center" bgcolor="#a80f1d" style="border:2px solid #ff4150; border-radius:999px; box-shadow:0 0 12px rgba(255,49,67,0.42);">
+                          <a href="${safeLink}" target="_blank" style="display:inline-block; padding:15px 24px; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:20px; font-weight:700; color:#ffffff; text-decoration:none;">&#8635;&nbsp;&nbsp;Reset Password&nbsp;&nbsp;&raquo;&raquo;</a>
+                        </td>
+                      </tr>
+                    </table>
+                    <div style="padding-top:24px; font-family:Arial, Helvetica, sans-serif; font-size:15px; line-height:23px; color:#d8d8dc;">&#128337;&nbsp; This link will expire in <strong style="color:#ff3b4c;">${safeExpiresMinutes} minutes.</strong></div>
+                  </td>
+                  <td class="watermark-cell" width="130" align="right" style="width:130px; vertical-align:bottom; padding-left:16px;">${watermarkLogo}</td>
+                </tr>
+              </table>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:26px;">
+                <tr>
+                  <td style="padding:14px 16px; border-left:3px solid #c81929; background-color:#1b1c21; font-family:Arial, Helvetica, sans-serif; font-size:14px; line-height:21px; color:#d1d1d5;">&#8505;&nbsp; If you did not request this, you can ignore this email.</td>
+                </tr>
+              </table>
+              <div style="padding-top:18px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:18px; color:#a9a9b0; word-break:break-word;">If the button does not work, copy and paste this secure link into your browser:<br><a href="${safeLink}" target="_blank" style="color:#ef3b4b; text-decoration:underline;">${safeLink}</a></div>
+            </td>
+          </tr>
+          <tr>
+            <td class="mobile-pad" style="padding:18px 42px 24px 42px; border-top:1px solid #7a1520; background-color:#0c0d10;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                  <td class="mobile-stack mobile-center" style="font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:16px; letter-spacing:0.7px; color:#b5b5ba; text-transform:uppercase;">&#128737;&nbsp; This is an automated message from Batangas State University.<br>Please do not reply to this email.</td>
+                  <td class="mobile-stack mobile-center" align="right" style="padding-left:14px; font-family:Arial, Helvetica, sans-serif; font-size:10px; line-height:16px; font-weight:700; letter-spacing:1.4px; color:#ee3343; text-transform:uppercase; white-space:nowrap;">Learn&nbsp; &bull; &nbsp;Serve&nbsp; &bull; &nbsp;Innovate</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+};
+
 const sendPasswordResetEmail = async ({ to, resetLink, expiresMinutes = RESET_TOKEN_EXPIRE_MINUTES }) => {
     try {
         if (!mailTransporter) return false;
         const from = process.env.MAIL_FROM || `BatStateU Key System <${process.env.SMTP_USER || 'no-reply@example.com'}>`;
-        const safeLink = resetLink.replace(/"/g, '&quot;');
-
-        const html = `
-            <p>We received a request to reset your password.</p>
-            <p><a href="${safeLink}">Reset Password</a></p>
-            <p>This link will expire in ${expiresMinutes} minutes.</p>
-            <p>If you did not request this, you can ignore this email.</p>
-        `;
+        const logoPath = path.join(PUBLIC_ROOT, 'images', 'logo.png');
+        const logoCid = 'batstateu-key-system-logo';
+        const hasLogo = fs.existsSync(logoPath);
+        const html = buildPasswordResetEmail({
+            resetLink,
+            expiresMinutes,
+            logoSource: hasLogo ? `cid:${logoCid}` : ''
+        });
+        const safeExpiresMinutes = clampInt(expiresMinutes, RESET_TOKEN_EXPIRE_MINUTES, { min: 1, max: 1_440 });
 
         await mailTransporter.sendMail({
             from,
             to,
-            subject: 'Reset your password',
-            html
+            subject: 'Password Reset Request — BatStateU Key System',
+            text: `We received a request to reset your password. Use this link to reset it: ${resetLink}\n\nThis link will expire in ${safeExpiresMinutes} minutes.\n\nIf you did not request this, you can ignore this email.`,
+            html,
+            attachments: hasLogo
+                ? [{
+                    filename: 'batstateu-logo.png',
+                    path: logoPath,
+                    cid: logoCid,
+                    contentDisposition: 'inline'
+                }]
+                : []
         });
 
         return true;
