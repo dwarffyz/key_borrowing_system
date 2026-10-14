@@ -6,6 +6,10 @@ ESP_DIR="$ROOT_DIR/hardware/esp32-locker-controller"
 ENV_FILE="$ROOT_DIR/public/.env"
 TOOLS_DIR="$ROOT_DIR/.tools"
 SUMMARY_FILE="$TOOLS_DIR/flash-esp-linux-summary.txt"
+PROJECT_HASH="$(printf '%s' "$ESP_DIR" | cksum | awk '{print $1}')"
+BUILD_DIR="${TMPDIR:-/tmp}/kbs-esp32-$PROJECT_HASH"
+LOCK_DIR="$TOOLS_DIR/.esp32-flash.lock"
+LOCK_HELD=0
 
 PORT="${ESP_PORT:-}"
 ERASE_FLASH=0
@@ -19,6 +23,35 @@ log() { printf '\n[esp-flash] %s\n' "$*"; }
 warn() { printf '\n[warning] %s\n' "$*" >&2; }
 die() { printf '\n[error] %s\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
+
+release_flash_lock() {
+  if [[ "$LOCK_HELD" == "1" ]]; then
+    rm -rf -- "$LOCK_DIR"
+  fi
+}
+
+acquire_flash_lock() {
+  mkdir -p "$TOOLS_DIR"
+  if mkdir "$LOCK_DIR" 2>/dev/null; then
+    printf '%s\n' "$$" > "$LOCK_DIR/pid"
+    LOCK_HELD=1
+    trap release_flash_lock EXIT INT TERM
+    return
+  fi
+
+  local owner_pid=""
+  [[ -f "$LOCK_DIR/pid" ]] && owner_pid="$(<"$LOCK_DIR/pid")"
+  if [[ "$owner_pid" =~ ^[0-9]+$ ]] && kill -0 "$owner_pid" 2>/dev/null; then
+    die "Another ESP32 flash is already running (PID $owner_pid). Wait for it to finish, then run this launcher again."
+  fi
+
+  warn "Recovered a stale ESP32 flash lock from an interrupted run."
+  rm -rf -- "$LOCK_DIR"
+  mkdir "$LOCK_DIR" || die "Unable to create ESP32 flash lock: $LOCK_DIR"
+  printf '%s\n' "$$" > "$LOCK_DIR/pid"
+  LOCK_HELD=1
+  trap release_flash_lock EXIT INT TERM
+}
 
 usage() {
   cat <<'EOF'
@@ -220,7 +253,7 @@ PY
 }
 
 main() {
-  mkdir -p "$TOOLS_DIR"
+  acquire_flash_lock
   : > "$SUMMARY_FILE"
 
   [[ -d "$ESP_DIR" ]] || die "Missing ESP project: $ESP_DIR"
@@ -237,11 +270,12 @@ main() {
   ensure_idf
 
   log "Building and flashing ESP32 firmware..."
-  (cd "$ESP_DIR" && idf.py set-target esp32)
+  # A short build directory avoids deeply nested ESP-IDF paths on Linux/macOS too.
+  (cd "$ESP_DIR" && idf.py -B "$BUILD_DIR" set-target esp32)
   if [[ "$ERASE_FLASH" == "1" ]]; then
-    (cd "$ESP_DIR" && idf.py -p "$resolved_port" erase-flash)
+    (cd "$ESP_DIR" && idf.py -B "$BUILD_DIR" -p "$resolved_port" erase-flash)
   fi
-  (cd "$ESP_DIR" && idf.py -p "$resolved_port" flash)
+  (cd "$ESP_DIR" && idf.py -B "$BUILD_DIR" -p "$resolved_port" flash)
 
   set_env LOCKER_CONTROLLER_SERIAL_PORT "$resolved_port"
   set_env LOCKER_CONTROLLER_SERIAL_AUTO_DETECT true

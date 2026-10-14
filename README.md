@@ -90,6 +90,24 @@ SKIP_SYSTEM_PACKAGES=1 ./install.sh
 ./start.sh
 ```
 
+### Flash the ESP32 controller
+
+On Windows, double-click `ONE-CLICK-FLASH-ESP32.bat`. It automatically finds
+the connected ESP controller, shows live build and upload progress (0%–100%),
+then verifies and provisions it. On Linux/macOS, run:
+
+```bash
+chmod +x ONE-CLICK-FLASH-ESP32.sh
+./ONE-CLICK-FLASH-ESP32.sh
+```
+
+The Linux/macOS launcher auto-detects the serial device. To specify one, use
+`ESP_PORT=/dev/ttyUSB0 ./ONE-CLICK-FLASH-ESP32.sh`.
+
+The flash launchers prevent two flashing sessions from using the same ESP at
+once, recover an abandoned lock after an interrupted run, and use short build
+paths to avoid ESP-IDF path-length errors.
+
 Open:
 
 ```text

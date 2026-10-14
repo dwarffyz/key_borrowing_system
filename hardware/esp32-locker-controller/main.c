@@ -31,9 +31,10 @@
 #endif
 
 // ================= PIN DEFINITIONS =================
-#define SR_DATA   23   // 74HC595 DS
+#define SR_DATA   23   // 74HC595 DS (GPIO 60 is not valid on the ESP32 target)
 #define SR_CLOCK  5    // 74HC595 SH_CP
 #define SR_LATCH  18   // 74HC595 ST_CP
+#define SR_OE     19   // 74HC595 OE# (active-low output enable)
 
 #define BTN_DATA  33   // 74HC165 Q7
 #define BTN_CLOCK 32   // 74HC165 CP
@@ -57,6 +58,7 @@
 
 #define LOCK_PULSE_MS      3000
 #define LOOP_DELAY_MS      20
+#define BUTTON_DEBOUNCE_SAMPLES 3
 #define SERIAL_UART_NUM    UART_NUM_0
 #define SERIAL_RX_BUFFER   1024
 #define SERIAL_CMD_MAX_LEN 256
@@ -68,6 +70,9 @@ static const char *TAG = "locker_portal";
 // ============== BUFFERS / STATE ====================
 static uint8_t input_bytes[NUM_INPUT_BYTES];
 static uint8_t prev_input_bytes[NUM_INPUT_BYTES];
+static uint8_t stable_input_bytes[NUM_INPUT_BYTES];
+static uint8_t candidate_input_bytes[NUM_INPUT_BYTES];
+static uint8_t button_debounce_samples = 0;
 static uint8_t output_bytes[NUM_OUTPUT_BYTES];
 
 static TickType_t lock_active_until[NUM_LOCKS];
@@ -120,6 +125,23 @@ static void write_595_chain(uint8_t *data, int num_bytes)
     gpio_set_level(SR_LATCH, 0);
 }
 
+/* Keep the 74HC595 outputs off while their shift registers are being updated. */
+static void disable_outputs(void)
+{
+    gpio_set_level(SR_OE, 1);
+}
+
+static void enable_outputs(void)
+{
+    gpio_set_level(SR_OE, 0);
+}
+
+static void clear_outputs(void)
+{
+    memset(output_bytes, 0, sizeof(output_bytes));
+    write_595_chain(output_bytes, NUM_OUTPUT_BYTES);
+}
+
 // ==================================================
 // 74HC165 READ
 // ==================================================
@@ -135,7 +157,7 @@ static void read_165_chain(uint8_t *data, int num_bytes)
 
         for (int i = 0; i < 8; i++) {
             value <<= 1;
-            value |= gpio_get_level(BTN_DATA);
+            value |= gpio_get_level(BTN_DATA) ? 1U : 0U;
 
             gpio_set_level(BTN_CLOCK, 1);
             esp_rom_delay_us(2);
@@ -173,6 +195,19 @@ static inline void set_output_bit(uint8_t *buf, int lock_index, bool state)
         buf[byte_index] &= ~(1U << bit_in_byte);
     }
 }
+
+/*
+ * Physical button input N opens locker N.  Keep this table explicit so the
+ * labelled panel (1, 2, 3, ...) and the system hardwareLockNumber always use
+ * the same numbering.  If a future PCB routes a button differently, change
+ * only the matching entry here rather than changing the shift-register logic.
+ */
+static const uint8_t manual_button_to_lock[NUM_LOCKS] = {
+     1,  2,  3,  4,  5,  6,  7,  8,
+     9, 10, 11, 12, 13, 14, 15, 16,
+    17, 18, 19, 20, 21, 22, 23, 24,
+    25, 26, 27, 28, 29, 30, 31, 32
+};
 
 static void trim_in_place(char *text)
 {
@@ -610,7 +645,8 @@ static void rebuild_outputs_from_active_pulses(void)
     memset(output_bytes, 0, sizeof(output_bytes));
 
     for (int i = 0; i < NUM_LOCKS; i++) {
-        if (lock_active_until[i] > now) {
+        /* Signed subtraction remains correct when the FreeRTOS tick counter wraps. */
+        if ((int32_t)(lock_active_until[i] - now) > 0) {
             set_output_bit(output_bytes, i, true);
         }
     }
@@ -620,9 +656,9 @@ static void rebuild_outputs_from_active_pulses(void)
 
 static void process_button_edges(void)
 {
-    for (int lock_index = 0; lock_index < NUM_LOCKS; lock_index++) {
-        bool current_level  = get_input_bit(input_bytes, lock_index);
-        bool previous_level = get_input_bit(prev_input_bytes, lock_index);
+    for (int button_index = 0; button_index < NUM_LOCKS; button_index++) {
+        bool current_level = get_input_bit(stable_input_bytes, button_index);
+        bool previous_level = get_input_bit(prev_input_bytes, button_index);
 
         // pull-up logic:
         // released = 1
@@ -630,11 +666,35 @@ static void process_button_edges(void)
         bool pressed_now = (previous_level == true) && (current_level == false);
 
         if (pressed_now) {
-            trigger_lock_pulse_internal(lock_index + 1);
+            int lock_number = manual_button_to_lock[button_index];
+            trigger_lock_pulse_internal(lock_number);
+            ESP_LOGI(TAG, "Manual button %d pressed: opening locker %d", button_index + 1, lock_number);
         }
     }
 
-    memcpy(prev_input_bytes, input_bytes, sizeof(input_bytes));
+    memcpy(prev_input_bytes, stable_input_bytes, sizeof(prev_input_bytes));
+}
+
+/* Return true only after a complete, unchanged input sample is stable. */
+static bool update_debounced_button_inputs(void)
+{
+    if (memcmp(input_bytes, candidate_input_bytes, sizeof(input_bytes)) != 0) {
+        memcpy(candidate_input_bytes, input_bytes, sizeof(candidate_input_bytes));
+        button_debounce_samples = 1;
+        return false;
+    }
+
+    if (button_debounce_samples < BUTTON_DEBOUNCE_SAMPLES) {
+        button_debounce_samples++;
+    }
+
+    if (button_debounce_samples < BUTTON_DEBOUNCE_SAMPLES ||
+        memcmp(stable_input_bytes, candidate_input_bytes, sizeof(stable_input_bytes)) == 0) {
+        return false;
+    }
+
+    memcpy(stable_input_bytes, candidate_input_bytes, sizeof(stable_input_bytes));
+    return true;
 }
 
 static void serial_init(void)
@@ -1090,7 +1150,7 @@ static esp_err_t status_handler(httpd_req_t *req)
     if (xSemaphoreTake(g_lock_mutex, pdMS_TO_TICKS(50)) == pdTRUE) {
         TickType_t now = xTaskGetTickCount();
         for (int i = 0; i < NUM_LOCKS; i++) {
-            if (lock_active_until[i] > now) {
+            if ((int32_t)(lock_active_until[i] - now) > 0) {
                 active_locks++;
             }
         }
@@ -1374,6 +1434,7 @@ static void gpio_init_all(void)
             (1ULL << SR_DATA) |
             (1ULL << SR_CLOCK) |
             (1ULL << SR_LATCH) |
+            (1ULL << SR_OE) |
             (1ULL << BTN_CLOCK) |
             (1ULL << BTN_LOAD),
         .mode = GPIO_MODE_OUTPUT,
@@ -1381,17 +1442,20 @@ static void gpio_init_all(void)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
-    gpio_config(&out_conf);
+    ESP_ERROR_CHECK(gpio_config(&out_conf));
 
     gpio_config_t in_conf = {
         .pin_bit_mask = (1ULL << BTN_DATA),
         .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
+        /* Keeps the serial input in a defined released state if the 74HC165 is off. */
+        .pull_up_en = GPIO_PULLUP_ENABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
-    gpio_config(&in_conf);
+    ESP_ERROR_CHECK(gpio_config(&in_conf));
 
+    /* OE# is active-low: turn all lock outputs off before touching data lines. */
+    disable_outputs();
     gpio_set_level(SR_DATA, 0);
     gpio_set_level(SR_CLOCK, 0);
     gpio_set_level(SR_LATCH, 0);
@@ -1422,12 +1486,35 @@ void app_main(void)
 
     memset(input_bytes, 0xFF, sizeof(input_bytes));
     memset(prev_input_bytes, 0xFF, sizeof(prev_input_bytes));
+    memset(stable_input_bytes, 0xFF, sizeof(stable_input_bytes));
+    memset(candidate_input_bytes, 0xFF, sizeof(candidate_input_bytes));
     memset(output_bytes, 0x00, sizeof(output_bytes));
     memset(lock_active_until, 0, sizeof(lock_active_until));
 
     gpio_init_all();
+
+    /* Establish the real released/pressed baseline before manual input is live. */
+    read_165_chain(input_bytes, NUM_INPUT_BYTES);
+    memcpy(stable_input_bytes, input_bytes, sizeof(stable_input_bytes));
+    memcpy(candidate_input_bytes, input_bytes, sizeof(candidate_input_bytes));
+    memcpy(prev_input_bytes, input_bytes, sizeof(prev_input_bytes));
+    button_debounce_samples = BUTTON_DEBOUNCE_SAMPLES;
+
+    /*
+     * Boot in a known-safe state.  Holding OE# high prevents relay/lock
+     * glitches while the shift-register data and latch lines settle.
+     */
+    disable_outputs();
+    gpio_set_level(SR_DATA, 0);
+    gpio_set_level(SR_CLOCK, 0);
+    gpio_set_level(SR_LATCH, 0);
+    vTaskDelay(pdMS_TO_TICKS(500));
+
+    clear_outputs();
+    vTaskDelay(pdMS_TO_TICKS(200));
+    enable_outputs();
+
     serial_init();
-    write_595_chain(output_bytes, NUM_OUTPUT_BYTES);
     if (load_sta_wifi_credentials_from_nvs() != ESP_OK) {
         ESP_LOGW(TAG, "Failed to load saved STA WiFi credentials");
         sta_wifi_ssid[0] = '\0';
@@ -1446,7 +1533,9 @@ void app_main(void)
         process_serial_input();
 
         if (xSemaphoreTake(g_lock_mutex, pdMS_TO_TICKS(10)) == pdTRUE) {
-            process_button_edges();
+            if (update_debounced_button_inputs()) {
+                process_button_edges();
+            }
             rebuild_outputs_from_active_pulses();
             xSemaphoreGive(g_lock_mutex);
         }

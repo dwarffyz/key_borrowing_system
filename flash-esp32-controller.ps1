@@ -13,10 +13,19 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 $toolsDir = Join-Path $root '.tools'
 $espProjectDir = Join-Path $root 'hardware\esp32-locker-controller'
+$projectPathBytes = [System.Text.Encoding]::UTF8.GetBytes($espProjectDir.ToLowerInvariant())
+$projectPathHash = [System.BitConverter]::ToString(([System.Security.Cryptography.SHA256]::Create().ComputeHash($projectPathBytes))).Replace('-', '').Substring(0, 12).ToLowerInvariant()
+$flashRunId = ("{0}-{1}" -f $PID, [Guid]::NewGuid().ToString('N').Substring(0, 8))
+$flashMutexName = "Global\KeyBorrowingSystem.Esp32Flash.$projectPathHash"
+$flashMutex = [System.Threading.Mutex]::new($false, $flashMutexName)
+$flashMutexAcquired = $false
+# Keep generated ESP-IDF artifacts out of long project paths.  This avoids the
+# Windows MAX_PATH failure that can occur inside ESP-IDF's deeply nested mbedTLS build.
+$espBuildDir = Join-Path ([System.IO.Path]::GetTempPath()) ("kbs-esp32-" + $projectPathHash)
 $envFile = Join-Path $root 'public\.env'
 $summaryFile = Join-Path $toolsDir 'flash-esp32-summary.txt'
-$stdoutLog = Join-Path $toolsDir 'flash-esp32.stdout.log'
-$stderrLog = Join-Path $toolsDir 'flash-esp32.stderr.log'
+$stdoutLog = Join-Path $toolsDir ("flash-esp32.{0}.stdout.log" -f $flashRunId)
+$stderrLog = Join-Path $toolsDir ("flash-esp32.{0}.stderr.log" -f $flashRunId)
 $serverStdoutLog = Join-Path $toolsDir 'local-system.stdout.log'
 $serverStderrLog = Join-Path $toolsDir 'local-system.stderr.log'
 $serverPidFile = Join-Path $toolsDir 'local-system.pid'
@@ -345,34 +354,22 @@ function Invoke-IdfCommand {
     $safeProject = $espProjectDir.Replace("'", "''")
     $command = ". '$safeExport'; Set-Location '$safeProject'; $CommandText; exit `$LASTEXITCODE"
 
-    $outFile = Join-Path $toolsDir 'flash-esp32.idf.out.tmp.log'
-    $errFile = Join-Path $toolsDir 'flash-esp32.idf.err.tmp.log'
-    if (Test-Path $outFile) { Remove-Item $outFile -Force }
-    if (Test-Path $errFile) { Remove-Item $errFile -Force }
-
+    Write-Host 'Live ESP-IDF output follows; upload progress will show 0% through 100%.' -ForegroundColor DarkGray
+    # Run in this terminal so compile steps and esptool upload percentages are visible live.
+    # The per-run log keeps output safe even if a previous failed run left files open.
+    # ESP-IDF progress is sent to stdout. Keep it in this terminal for a
+    # responsive percentage display. Direct console inheritance avoids turning
+    # ESP-IDF's normal stderr setup notices into false PowerShell errors.
     $process = Start-Process -FilePath $powershellExe `
         -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', $command) `
         -WorkingDirectory $espProjectDir `
-        -WindowStyle Hidden `
-        -RedirectStandardOutput $outFile `
-        -RedirectStandardError $errFile `
+        -NoNewWindow `
         -Wait `
         -PassThru
+    $exitCode = $process.ExitCode
 
-    $outText = if (Test-Path $outFile) { Get-Content -Raw -Path $outFile } else { '' }
-    $errText = if (Test-Path $errFile) { Get-Content -Raw -Path $errFile } else { '' }
-    if ($outText) {
-        Add-Content -Path $stdoutLog -Value $outText
-        Write-Host $outText
-    }
-    if ($errText) {
-        Add-Content -Path $stdoutLog -Value $errText
-        Write-Host $errText
-    }
-
-    if ($process.ExitCode -ne 0) {
-        $tail = (($errText + "`n" + $outText) -split "\r?\n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | Select-Object -Last 8) -join ' '
-        throw ("ESP-IDF command failed (exit {0}): {1}. {2}" -f $process.ExitCode, $CommandText, $tail)
+    if ($exitCode -ne 0) {
+        throw ("ESP-IDF command failed (exit {0}): {1}. Review the live output above for details." -f $exitCode, $CommandText)
     }
 }
 
@@ -514,6 +511,17 @@ $scriptExit = 0
 $serverStoppedForFlash = $false
 
 try {
+    try {
+        $flashMutexAcquired = $flashMutex.WaitOne(0)
+    } catch [System.Threading.AbandonedMutexException] {
+        # Windows releases an abandoned mutex after a crash; safely take over.
+        $flashMutexAcquired = $true
+        Write-Host 'Recovered an interrupted ESP32 flash session.' -ForegroundColor Yellow
+    }
+    if (-not $flashMutexAcquired) {
+        throw 'Another ESP32 flash is already running. Wait for it to finish, then run this launcher again.'
+    }
+
     Write-Host '============================================'
     Write-Host 'Key Borrowing System - One Click ESP32 Flash'
     Write-Host '============================================'
@@ -543,7 +551,7 @@ try {
         Write-Host 'Erasing flash first because -EraseFlash was provided.' -ForegroundColor Yellow
         Invoke-IdfCommand -ExportPath $idf.ExportPath -CommandText ("idf.py -p {0} erase-flash" -f $resolvedPort)
     }
-    Invoke-IdfCommand -ExportPath $idf.ExportPath -CommandText ("idf.py -p {0} flash" -f $resolvedPort)
+    Invoke-IdfCommand -ExportPath $idf.ExportPath -CommandText ("idf.py -B '{0}' -p {1} flash" -f $espBuildDir.Replace("'", "''"), $resolvedPort)
     Add-SummaryLine 'Firmware flash: success'
 
     Write-Step '4) Verifying ESP serial status...'
@@ -605,7 +613,15 @@ try {
     }
     Write-Host ("Summary saved to {0}" -f $summaryFile) -ForegroundColor Yellow
 } finally {
-    Write-SummaryFile
+    try {
+        Write-SummaryFile
+    } catch {
+        # A report failure must never leave the one-click flasher locked.
+        Write-Host ("WARNING: Could not save flash summary: {0}" -f $_.Exception.Message) -ForegroundColor Yellow
+    } finally {
+        if ($flashMutexAcquired) { $flashMutex.ReleaseMutex() }
+        $flashMutex.Dispose()
+    }
     Pause-IfNeeded
     exit $scriptExit
 }
