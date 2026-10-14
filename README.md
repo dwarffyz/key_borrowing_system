@@ -57,38 +57,119 @@ The web app lives in `public/`. The ESP32 firmware lives in `hardware/esp32-lock
 
 ## Quick Start
 
-### Windows
+Use this section for a new PC. The application runs on the computer; Docker is
+used only for MongoDB. That keeps USB/COM access and ESP32 networking available
+to the application.
 
-PowerShell:
+### Windows 10/11
 
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1
-powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
-```
-
-CMD:
+1. Clone or download this repository, then open a terminal in its folder.
+2. Run the first-time setup. It installs required packages, prepares `public/.env`,
+   installs npm packages, and starts Docker/MongoDB when Docker is available.
 
 ```bat
 setup-new-pc.bat
+```
+
+3. Start the complete system:
+
+```bat
 start-complete-system.bat
 ```
 
-### Linux
+Open [http://localhost:3000](http://localhost:3000). To stop it and disable
+Windows recovery/autostart, run `stop-complete-system.bat`.
+
+### Linux: complete setup and run guide
+
+The commands below work best on Ubuntu, Debian, and Linux Mint. Run them as a
+normal user—not as `root`. The installer asks for your password only when it
+needs `sudo` to install packages.
+
+1. Clone the project and enter it:
 
 ```bash
-chmod +x install.sh start.sh update.sh uninstall.sh flash-esp.sh
+git clone https://github.com/dwarffyz/key_borrowing_system.git
+cd key_borrowing_system
+```
+
+2. Install Docker Engine and the Compose plugin if Docker is not already
+   installed. On Ubuntu/Debian, the distribution packages are sufficient:
+
+```bash
+sudo apt update
+sudo apt install -y docker.io
+if apt-cache show docker-compose-plugin >/dev/null 2>&1; then
+  sudo apt install -y docker-compose-plugin
+else
+  sudo apt install -y docker-compose-v2
+fi
+sudo systemctl enable --now docker
+sudo usermod -aG docker "$USER"
+```
+
+Log out and sign in again after `usermod`, then confirm that Docker works
+without `sudo`:
+
+```bash
+docker run --rm hello-world
+```
+
+If your Linux distribution uses another package manager, install Docker Engine
+and Docker Compose v2 through that distribution's official Docker instructions.
+
+3. Make the launchers executable and run the installer:
+
+```bash
+chmod +x install.sh start.sh update.sh uninstall.sh \
+  start-complete-system.sh stop-complete-system.sh flash-esp.sh \
+  ONE-CLICK-FLASH-ESP32.sh
 ./install.sh
+```
+
+`./install.sh` installs Node.js/npm/Git/Python where supported, copies
+`public/.env.example` to `public/.env` when necessary, installs npm packages,
+and starts the MongoDB container.
+
+4. Review `public/.env` before production use. At minimum, replace
+`JWT_SECRET`, `SESSION_SECRET`, and `ADMIN_PASSWORD`; configure SMTP only if
+password-reset emails are needed.
+
+5. Start the app:
+
+```bash
 ./start.sh
 ```
+
+Keep that terminal open while the app is running. Visit:
+
+```text
+http://localhost:3000
+http://localhost:3000/admin
+```
+
+To stop a foreground run, press `Ctrl+C`. MongoDB data remains safely stored in
+the Docker volume. To start the app again later, open the project folder and
+run `./start.sh` again.
 
 ### macOS
 
+Install Docker Desktop first, then run:
+
 ```bash
 brew install node python git
-chmod +x install.sh start.sh flash-esp.sh
+chmod +x install.sh start.sh start-complete-system.sh stop-complete-system.sh flash-esp.sh ONE-CLICK-FLASH-ESP32.sh
 SKIP_SYSTEM_PACKAGES=1 ./install.sh
 ./start.sh
 ```
+
+### First-run checklist
+
+- Docker is running: `docker info`
+- MongoDB is healthy: `docker compose ps`
+- `public/.env` exists and does not contain development secrets
+- Port 3000 is available
+- The browser opens `http://localhost:3000`
 
 ### Flash the ESP32 controller
 
@@ -134,6 +215,28 @@ docker compose up -d mongodb
 
 Do not run `docker compose down -v` unless you intentionally want to permanently delete all database data.
 
+### Linux Docker troubleshooting
+
+If `./start.sh` says Docker is unavailable or not running, run:
+
+```bash
+sudo systemctl start docker
+docker info
+docker compose ps
+```
+
+If `docker info` works only with `sudo`, the current account has not yet picked
+up the `docker` group membership. Sign out and sign back in, or run
+`newgrp docker`, then retry `docker info`. Do not use `sudo ./start.sh`; it can
+create root-owned project files.
+
+If MongoDB does not become healthy, inspect its logs:
+
+```bash
+docker compose logs --tail=100 mongodb
+docker compose up -d mongodb
+```
+
 ## Start Automatically After Restart
 
 Autostart is opt-in. It restores the app after an unexpected shutdown or restart: Windows starts the complete system after sign-in (local app plus Cloudflare in Hybrid mode), Linux starts the local service after boot, and macOS starts it after sign-in. MongoDB is started by the normal launcher. Windows retries temporary Docker, WiFi, and Cloudflare startup failures; its log is saved in `.tools/autostart.log`. The app must have been set up successfully once first.
@@ -146,21 +249,41 @@ Enable it directly through PowerShell only when needed:
 powershell -ExecutionPolicy Bypass -File .\start-complete-system.ps1 -EnableAutostart
 ```
 
-Linux/macOS:
+### Linux
+
+On Linux, this installs a `systemd` service. It starts after networking becomes
+available, restarts after a failure, and starts again when the PC boots:
 
 ```bash
-chmod +x start-complete-system.sh stop-complete-system.sh scripts/*autostart*.sh
 ./start-complete-system.sh
+```
+
+Check its health or live logs:
+
+```bash
+sudo systemctl status key-borrowing-system
+sudo journalctl -u key-borrowing-system -f
+```
+
+Disable it and stop the app:
+
+```bash
+./stop-complete-system.sh
+```
+
+### macOS
+
+The same commands install or remove a LaunchAgent, which starts after sign-in:
+
+```bash
+./start-complete-system.sh
+./stop-complete-system.sh
 ```
 
 Disable it directly through PowerShell only when needed:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\stop-complete-system.ps1 -DisableAutostart
-```
-
-```bash
-./stop-complete-system.sh
 ```
 
 ## Installation
@@ -218,6 +341,30 @@ With manual serial port:
 The flash script builds the ESP-IDF project, flashes the ESP32, saves the detected serial port to `public/.env`, configures station WiFi if provided, configures the ESP portal URL, sets portal mode, and verifies the controller with `STATUS`.
 
 See [docs/ESP_FLASHING.md](docs/ESP_FLASHING.md) for drivers, recovery steps, and common errors.
+
+## Everyday Commands
+
+| Need | Windows | Linux/macOS |
+|---|---|---|
+| First setup | `setup-new-pc.bat` | `./install.sh` |
+| Start normally | `start-complete-system.bat` | `./start.sh` |
+| Stop and remove autostart | `stop-complete-system.bat` | `./stop-complete-system.sh` |
+| Enable boot recovery | Run `start-complete-system.bat` once | `./start-complete-system.sh` |
+| Update project packages | `powershell -ExecutionPolicy Bypass -File .\\scripts\\update.ps1` | `./update.sh` |
+| Flash ESP32 | `ONE-CLICK-FLASH-ESP32.bat` | `./ONE-CLICK-FLASH-ESP32.sh` |
+| View MongoDB health | `docker compose ps` | `docker compose ps` |
+
+## Troubleshooting
+
+| Problem | What to do |
+|---|---|
+| Browser cannot open the app | Confirm `./start.sh` is still running and open `http://localhost:3000`. |
+| Port 3000 is already in use | Stop the other Node.js app using port 3000, or change `PORT` in `public/.env`. |
+| MongoDB connection error | Start Docker, run `docker compose up -d mongodb`, then check `docker compose logs mongodb`. |
+| `permission denied: ./start.sh` | Run `chmod +x start.sh` once. |
+| Linux says `docker: permission denied` | Run `sudo usermod -aG docker "$USER"`, sign out/in, and run `docker info`. |
+| ESP flasher cannot find a device | Reconnect the ESP USB cable, close serial monitors, then run the one-click launcher again. On Linux, try `ESP_PORT=/dev/ttyUSB0 ./ONE-CLICK-FLASH-ESP32.sh`. |
+| ESP serial permission error on Linux | Add the user to the appropriate serial group, normally `sudo usermod -aG dialout "$USER"`, then sign out/in. |
 
 ## Usage
 
